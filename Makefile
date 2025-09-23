@@ -13,7 +13,8 @@ CXXFLAGS =  -Iinclude \
 
 SOURCES = source/main.cpp \
 		  source/stack.cpp \
-		  source/commands.cpp
+		  source/commands.cpp \
+		  source/verify.cpp
 
 EXECUTABLE = run.exe
 

@@ -3,6 +3,7 @@
 
 #include "struct.h"
 #include "libs.h"
+#include "verify.h"
 
 StackErr_t StackCtor(Stack_t* stack, size_t capacity);
 
