@@ -5,7 +5,10 @@
 
 int main()
 {
-    Stack_t stack = {};
+    Stack_t stack = {.VarInfo = {.struct_name = "stack",
+                                 .file_name = __FILE__,
+                                 .function = __func__,
+                                 .line = __LINE__}};
 
     if (StackCtor(&stack, 5) != STACK_SUCCESS)
     {

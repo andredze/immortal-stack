@@ -3,24 +3,43 @@
 
 #include "libs.h"
 
+#define ASSERT_OK(stack) stack->VarInfo.file_name = __FILE__; \
+                    stack->VarInfo.function = __func__; \
+                    stack->VarInfo.line = __LINE__; \
+                    if ((error = StackVerify(stack)) != STACK_SUCCESS) \
+                    { \
+                        StackDump(stack, error); \
+                        return error; \
+                    }
+
+const int POISON = INT_MIN;
 const size_t SIZE_LIMIT = SIZE_MAX / 32 * 31;
+const size_t MAX_LINE_LEN = 200;
 
 typedef int item_t;
 
 typedef enum StackErr {
-    STACK_SUCCESS,
-    NULL_STACK,
-    NULL_DATA,
-    SIZE_EXCEEDS_CAPACITY,
-    ZERO_CAPACITY,
-    SIZE_EXCEEDS_LIMIT,
-    CAPACITY_EXCEEDS_LIMIT
+    STACK_SUCCESS = 0,
+    NULL_STACK = 1,
+    NULL_DATA = 2,
+    ZERO_CAPACITY = 3,
+    SIZE_EXCEEDS_LIMIT = 4,
+    CAPACITY_EXCEEDS_LIMIT = 5,
+    SIZE_EXCEEDS_CAPACITY = 6
 } StackErr_t;
+
+typedef struct VarInfo {
+    const char* struct_name;
+    const char* file_name;
+    const char* function;
+    int line;
+} VarInfo_t;
 
 typedef struct Stack {
     item_t* data;
     size_t size;
     size_t capacity;
+    VarInfo_t VarInfo;
 } Stack_t;
 
 #endif /* STRUCT_H */

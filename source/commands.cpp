@@ -3,17 +3,17 @@
 StackErr_t StackPush(Stack_t* stack, item_t item)
 {
     StackErr_t error = STACK_SUCCESS;
-    if ((error = StackVerify(stack)) != STACK_SUCCESS)
+    if ((error = StackIsOk(stack, __FILE__, __func__, __LINE__)) != STACK_SUCCESS)
     {
-        // StackDump(stack)
         return error;
     }
 
+    fprintf(stderr, "pushed = %d\n", item);
     stack->data[stack->size++] = item;
+    fprintf(stderr, "stack size = %zu\n", stack->size);
 
-    if ((error = StackVerify(stack)) != STACK_SUCCESS)
+    if ((error = StackIsOk(stack, __FILE__, __func__, __LINE__)) != STACK_SUCCESS)
     {
-        // StackDump(stack)
         return error;
     }
 
@@ -23,17 +23,17 @@ StackErr_t StackPush(Stack_t* stack, item_t item)
 StackErr_t StackPop(Stack_t* stack, item_t* item)
 {
     StackErr_t error = STACK_SUCCESS;
-    if ((error = StackVerify(stack)) != STACK_SUCCESS)
+    if ((error = StackIsOk(stack, __FILE__, __func__, __LINE__)) != STACK_SUCCESS)
     {
-        // StackDump(stack)
         return error;
     }
 
     *item = stack->data[--stack->size];
+    stack->data[stack->size] = POISON;
+    fprintf(stderr, "stack size = %zu\n", stack->size);
 
-    if ((error = StackVerify(stack)) != STACK_SUCCESS)
+    if ((error = StackIsOk(stack, __FILE__, __func__, __LINE__)) != STACK_SUCCESS)
     {
-        // StackDump(stack)
         return error;
     }
 
