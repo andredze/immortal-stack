@@ -12,9 +12,7 @@ CXXFLAGS =  -Iinclude \
 			-D_EJUDGE_CLIENT_SIDE
 
 SOURCES = source/main.cpp \
-		  source/stack.cpp \
-		  source/commands.cpp \
-		  source/verify.cpp
+		  source/stack.cpp
 
 EXECUTABLE = run.exe
 
@@ -29,8 +27,8 @@ release:
 debug:
 	$(CXX) -DDEBUG_MODE $(CXXFLAGS) $(SOURCES) -o $(EXECUTABLE)
 
-cleanall:
+clean:
 	rm $(OUTPUTS) $(EXECUTABLE)
 
-clean:
+cleanlogs:
 	rm $(OUTPUTS)

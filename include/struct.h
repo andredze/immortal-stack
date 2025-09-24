@@ -3,14 +3,7 @@
 
 #include "libs.h"
 
-#define ASSERT_OK(stack) stack->VarInfo.file_name = __FILE__; \
-                    stack->VarInfo.function = __func__; \
-                    stack->VarInfo.line = __LINE__; \
-                    if ((error = StackVerify(stack)) != STACK_SUCCESS) \
-                    { \
-                        StackDump(stack, error); \
-                        return error; \
-                    }
+// #define ASSERT_OK(stack)
 
 const int POISON = INT_MIN;
 const size_t SIZE_LIMIT = SIZE_MAX / 32 * 31;

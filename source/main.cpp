@@ -1,5 +1,4 @@
 #include "stack.h"
-#include "commands.h"
 #include "libs.h"
 #include "struct.h"
 
