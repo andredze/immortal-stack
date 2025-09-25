@@ -1,5 +1,11 @@
 #include "stack.h"
 
+#ifdef DEBUG
+#define DEBUG_ACTIVE 1
+#else
+#define DEBUG_ACTIVE 0
+#endif
+
 StackErr_t StackCtor(Stack_t* stack, size_t capacity)
 {
     stack->capacity = capacity;
@@ -10,6 +16,12 @@ StackErr_t StackCtor(Stack_t* stack, size_t capacity)
     }
 
     item_t* data = (item_t*) calloc(capacity, sizeof(item_t));
+    if (data == NULL)
+    {
+        fprintf(stderr, "Memory allocation failed");
+        return CALLOC_ERROR;
+    }
+
     stack->data = data;
     for (size_t i = 0; i < capacity; i++)
     {
@@ -17,9 +29,35 @@ StackErr_t StackCtor(Stack_t* stack, size_t capacity)
     }
 
     StackErr_t error = STACK_SUCCESS;
-    if ((error = StackIsOk(stack, __FILE__, __func__, __LINE__)) != STACK_SUCCESS)
+    if (DEBUG_ACTIVE)
     {
-        return error;
+        STACK_OK(stack);
+    }
+
+    return STACK_SUCCESS;
+}
+
+StackErr_t StackRealloc(Stack_t* stack)
+{
+    StackErr_t error = STACK_SUCCESS;
+    if (DEBUG_ACTIVE)
+    {
+        STACK_OK(stack);
+    }
+
+    size_t capacity = stack->capacity;
+    item_t* data = stack->data;
+
+    data = (item_t*) realloc(data, capacity * 3 / 2 + 1);
+    if (data == NULL)
+    {
+        fprintf(stderr, "Memory reallocation failed");
+        return REALLOC_ERROR;
+    }
+
+    if (DEBUG_ACTIVE)
+    {
+        STACK_OK(stack);
     }
 
     return STACK_SUCCESS;
@@ -28,18 +66,26 @@ StackErr_t StackCtor(Stack_t* stack, size_t capacity)
 StackErr_t StackPush(Stack_t* stack, item_t item)
 {
     StackErr_t error = STACK_SUCCESS;
-    if ((error = StackIsOk(stack, __FILE__, __func__, __LINE__)) != STACK_SUCCESS)
+    if (DEBUG_ACTIVE)
     {
-        return error;
+        STACK_OK(stack);
     }
 
-    fprintf(stderr, "pushed = %d\n", item);
-    stack->data[stack->size++] = item;
-    fprintf(stderr, "stack size = %zu\n", stack->size);
-
-    if ((error = StackIsOk(stack, __FILE__, __func__, __LINE__)) != STACK_SUCCESS)
+    // fprintf(stderr, "stack size = %zu\n", stack->size);
+    if (stack->size >= stack->capacity)
     {
-        return error;
+        if ((error = StackRealloc(stack)) != STACK_SUCCESS)
+        {
+            return error;
+        }
+    }
+    stack->data[stack->size++] = item;
+    // fprintf(stderr, "pushed = %d\n", item);
+    // fprintf(stderr, "stack size = %zu\n", stack->size);
+
+    if (DEBUG_ACTIVE)
+    {
+        STACK_OK(stack);
     }
 
     return STACK_SUCCESS;
@@ -48,18 +94,19 @@ StackErr_t StackPush(Stack_t* stack, item_t item)
 StackErr_t StackPop(Stack_t* stack, item_t* item)
 {
     StackErr_t error = STACK_SUCCESS;
-    if ((error = StackIsOk(stack, __FILE__, __func__, __LINE__)) != STACK_SUCCESS)
+    if (DEBUG_ACTIVE)
     {
-        return error;
+        STACK_OK(stack);
     }
 
+    // fprintf(stderr, "stack size = %zu\n", stack->size);
     *item = stack->data[--stack->size];
     stack->data[stack->size] = POISON;
-    fprintf(stderr, "stack size = %zu\n", stack->size);
+    // fprintf(stderr, "stack size = %zu\n", stack->size);
 
-    if ((error = StackIsOk(stack, __FILE__, __func__, __LINE__)) != STACK_SUCCESS)
+    if (DEBUG_ACTIVE)
     {
-        return error;
+        STACK_OK(stack);
     }
 
     return STACK_SUCCESS;
@@ -113,6 +160,12 @@ int StackErrToStr(StackErr_t error, const char** line)
         case 6:
             *line = "Size exceeded capacity";
             break;
+        case 7:
+            *line = "Memory allocation with calloc failed";
+            break;
+        case 8:
+            *line = "Memory reallocation failed";
+            break;
         default:
             return 1;
     }
@@ -122,9 +175,20 @@ int StackErrToStr(StackErr_t error, const char** line)
 int StackDump(Stack_t* stack, StackErr_t error)
 {
     FILE* stream = fopen("stack.log", "w");
+    if (stream == NULL)
+    {
+        fprintf(stderr, "Can not open stream: stack.log");
+        return 1;
+    }
 
     const char* error_str = NULL;
     StackErrToStr(error, &error_str);
+
+    if (error == NULL_STACK)
+    {
+        fprintf(stream, "%s\n", error_str);
+        return 0;
+    }
 
     fprintf(stream, "from %s at %s:%d\n"
                     "ERROR %d: %s\n"
@@ -140,8 +204,27 @@ int StackDump(Stack_t* stack, StackErr_t error)
                     stack->size,
                     stack->capacity,
                     stack->data);
+
+    if (error == NULL_DATA)
+    {
+        fprintf(stream, "\t----------------"
+                        "\t}"
+                        "}");
+        return 0;
+    }
+
     size_t size = stack->size;
     size_t capacity = stack->capacity;
+    // if size/capacity is wrong, output only 20 first elements
+    if (error == SIZE_EXCEEDS_LIMIT)
+    {
+        size = 10;
+    }
+    if (error == CAPACITY_EXCEEDS_LIMIT)
+    {
+        capacity = size;
+    }
+
     for (size_t i = 0; i < size; i++)
     {
         fprintf(stream, "\t\t*[%zu] = %d;\n", i, stack->data[i]);

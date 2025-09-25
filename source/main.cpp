@@ -1,6 +1,6 @@
 #include "stack.h"
 #include "libs.h"
-#include "struct.h"
+#include "common.h"
 
 int main()
 {
@@ -23,6 +23,14 @@ int main()
         return EXIT_FAILURE;
     }
     if (StackPush(&stack, 30) != STACK_SUCCESS)
+    {
+        return EXIT_FAILURE;
+    }
+    if (StackPush(&stack, 40) != STACK_SUCCESS)
+    {
+        return EXIT_FAILURE;
+    }
+    if (StackPush(&stack, 50) != STACK_SUCCESS)
     {
         return EXIT_FAILURE;
     }
@@ -54,5 +62,27 @@ int main()
     }
     printf("poped_item = %d\n", poped_item);
 
+    if (StackPop(&stack, &poped_item) != STACK_SUCCESS)
+    {
+        printf("ERROR");
+        return EXIT_FAILURE;
+    }
+    printf("poped_item = %d\n", poped_item);
+
+    if (StackPop(&stack, &poped_item) != STACK_SUCCESS)
+    {
+        printf("ERROR");
+        return EXIT_FAILURE;
+    }
+    printf("poped_item = %d\n", poped_item);
+
+    if (StackPop(&stack, &poped_item) != STACK_SUCCESS)
+    {
+        printf("ERROR");
+        return EXIT_FAILURE;
+    }
+    printf("poped_item = %d\n", poped_item);
+
+    fprintf(stderr, "\n<Programm ran without errors>");
     return EXIT_SUCCESS;
 }

@@ -3,7 +3,10 @@
 
 #include "libs.h"
 
-// #define ASSERT_OK(stack)
+#define STACK_OK(stack) if ((error = StackIsOk(stack, __FILE__, __func__, __LINE__)) != STACK_SUCCESS) \
+                        { \
+                            return error; \
+                        }
 
 const int POISON = INT_MIN;
 const size_t SIZE_LIMIT = SIZE_MAX / 32 * 31;
@@ -18,7 +21,9 @@ typedef enum StackErr {
     ZERO_CAPACITY = 3,
     SIZE_EXCEEDS_LIMIT = 4,
     CAPACITY_EXCEEDS_LIMIT = 5,
-    SIZE_EXCEEDS_CAPACITY = 6
+    SIZE_EXCEEDS_CAPACITY = 6,
+    CALLOC_ERROR = 7,
+    REALLOC_ERROR = 8
 } StackErr_t;
 
 typedef struct VarInfo {
