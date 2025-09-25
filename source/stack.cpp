@@ -8,25 +8,29 @@
 
 StackErr_t StackCtor(Stack_t* stack, size_t capacity)
 {
-    stack->capacity = capacity;
+    stack->capacity = capacity + 2;
 
-    if (capacity > SIZE_LIMIT)
+    if (stack->capacity > SIZE_LIMIT)
     {
         return CAPACITY_EXCEEDS_LIMIT;
     }
 
-    item_t* data = (item_t*) calloc(capacity, sizeof(item_t));
+    item_t* data = (item_t*) calloc(stack->capacity, sizeof(item_t));
     if (data == NULL)
     {
         fprintf(stderr, "Memory allocation failed");
         return CALLOC_ERROR;
     }
+    data[0] = CANARY_VALUE;
+    data[capacity + 1] = CANARY_VALUE;
+    stack->size = 1;
 
-    stack->data = data;
-    for (size_t i = 0; i < capacity; i++)
+    for (size_t i = 1; i < capacity + 1; i++)
     {
         data[i] = POISON;
     }
+
+    stack->data = data;
 
     StackErr_t error = STACK_SUCCESS;
     if (DEBUG_ACTIVE)
@@ -45,15 +49,17 @@ StackErr_t StackRealloc(Stack_t* stack)
         STACK_OK(stack);
     }
 
-    size_t capacity = stack->capacity;
+    stack->capacity = stack->capacity * 3 / 2 + 1;
     item_t* data = stack->data;
 
-    data = (item_t*) realloc(data, capacity * 3 / 2 + 1);
+    data = (item_t*) realloc(data, stack->capacity);
     if (data == NULL)
     {
         fprintf(stderr, "Memory reallocation failed");
         return REALLOC_ERROR;
     }
+    data[0] = CANARY_VALUE;
+    data[stack->capacity + 1] = CANARY_VALUE;
 
     if (DEBUG_ACTIVE)
     {
@@ -127,10 +133,16 @@ StackErr_t StackIsOk(Stack_t* stack,
     stack->VarInfo.file_name = file_name;
     stack->VarInfo.function = function;
     stack->VarInfo.line = line;
+
     StackErr_t error = STACK_SUCCESS;
+    StackErr_t dump_return = STACK_SUCCESS;
     if ((error = StackVerify(stack)) != STACK_SUCCESS)
     {
-        StackDump(stack, error);
+        fprintf(stderr, "<Error occurred>");
+        if ((dump_return = StackDump(stack, error)) != STACK_SUCCESS)
+        {
+            return dump_return;
+        }
     }
     return error;
 }
@@ -139,32 +151,41 @@ int StackErrToStr(StackErr_t error, const char** line)
 {
     switch (error)
     {
-        case 0:
+        case STACK_SUCCESS:
             *line = "No errors occurred";
             break;
-        case 1:
+        case NULL_STACK:
             *line = "Pointer to the stack structure is NULL";
             break;
-        case 2:
+        case NULL_DATA:
             *line = "Pointer to the stack data is NULL";
             break;
-        case 3:
+        case ZERO_CAPACITY:
             *line = "Capacity equals zero";
             break;
-        case 4:
+        case SIZE_EXCEEDS_LIMIT:
             *line = "Size exceeded limit (possibly set to the negative value)";
             break;
-        case 5:
+        case CAPACITY_EXCEEDS_LIMIT:
             *line = "Capacity exceeded limit (possibly set to the negative value)";
             break;
-        case 6:
+        case SIZE_EXCEEDS_CAPACITY:
             *line = "Size exceeded capacity";
             break;
-        case 7:
+        case CALLOC_ERROR:
             *line = "Memory allocation with calloc failed";
             break;
-        case 8:
+        case REALLOC_ERROR:
             *line = "Memory reallocation failed";
+            break;
+        case WENT_BEYOND_START:
+            *line = "Start boundary value was changed";
+            break;
+        case WENT_BEYOND_END:
+            *line = "End boundary value was changed";
+            break;
+        case FILE_OPENNING_ERROR:
+            *line = "Opening the log file failed";
             break;
         default:
             return 1;
@@ -172,13 +193,13 @@ int StackErrToStr(StackErr_t error, const char** line)
     return 0;
 }
 
-int StackDump(Stack_t* stack, StackErr_t error)
+StackErr_t StackDump(Stack_t* stack, StackErr_t error)
 {
     FILE* stream = fopen("stack.log", "w");
     if (stream == NULL)
     {
         fprintf(stderr, "Can not open stream: stack.log");
-        return 1;
+        return FILE_OPENNING_ERROR;
     }
 
     const char* error_str = NULL;
@@ -187,7 +208,7 @@ int StackDump(Stack_t* stack, StackErr_t error)
     if (error == NULL_STACK)
     {
         fprintf(stream, "%s\n", error_str);
-        return 0;
+        return STACK_SUCCESS;
     }
 
     fprintf(stream, "from %s at %s:%d\n"
@@ -210,11 +231,12 @@ int StackDump(Stack_t* stack, StackErr_t error)
         fprintf(stream, "\t----------------"
                         "\t}"
                         "}");
-        return 0;
+        return STACK_SUCCESS;
     }
 
     size_t size = stack->size;
     size_t capacity = stack->capacity;
+    item_t* data = stack->data;
     // if size/capacity is wrong, output only 20 first elements
     if (error == SIZE_EXCEEDS_LIMIT)
     {
@@ -224,37 +246,54 @@ int StackDump(Stack_t* stack, StackErr_t error)
     {
         capacity = size;
     }
+    if (error == SIZE_EXCEEDS_CAPACITY)
+    {
+        size = capacity - 1;
+    }
 
-    for (size_t i = 0; i < size; i++)
+    fprintf(stream, "\t\t [0] = %d (CANARY);\n", stack->data[0]);
+    for (size_t i = 1; i < size; i++)
     {
-        fprintf(stream, "\t\t*[%zu] = %d;\n", i, stack->data[i]);
+        if (data[i] == POISON)
+        {
+            size = i;
+            break;
+        }
+        fprintf(stream, "\t\t*[%zu] = %d;\n",
+                        i, stack->data[i]);
     }
-    for (size_t j = size; j < capacity; j++)
+    for (size_t j = size; j < capacity - 1; j++)
     {
-        fprintf(stream, "\t\t [%zu] = %d;\n", j, stack->data[j]);
+        fprintf(stream, "\t\t [%zu] = %d (POISON);\n",
+                        j, stack->data[j]);
     }
-    fprintf(stream, "\t}\n"
-                    "}");
-    return 0;
+    fprintf(stream, "\t\t [%zu] = %d (CANARY);\n"
+                    "\t}\n"
+                    "}",
+                    capacity - 1, stack->data[capacity - 1]);
+    fclose(stream);
+
+    return STACK_SUCCESS;
 }
 
 StackErr_t StackVerify(Stack_t* stack)
 {
     size_t size = stack->size;
     size_t capacity = stack->capacity;
+    item_t* data = stack->data;
 
     if (stack == NULL)
     {
         return NULL_STACK;
     }
-    if (stack->data == NULL)
+    if (data == NULL)
     {
         return NULL_DATA;
     }
-    if (capacity == 0)
-    {
-        return ZERO_CAPACITY;
-    }
+    // if (capacity == 0)
+    // {
+    //     return ZERO_CAPACITY;
+    // }
     if (size > SIZE_LIMIT)
     {
         return SIZE_EXCEEDS_LIMIT;
@@ -263,9 +302,17 @@ StackErr_t StackVerify(Stack_t* stack)
     {
         return CAPACITY_EXCEEDS_LIMIT;
     }
-    // if (size > capacity)
-    // {
-    //     return SIZE_EXCEEDS_CAPACITY;
-    // }
+    if (size > capacity + 1)
+    {
+        return SIZE_EXCEEDS_CAPACITY;
+    }
+    if (data[0] != CANARY_VALUE)
+    {
+        return WENT_BEYOND_START;
+    }
+    if (data[capacity - 1] != CANARY_VALUE)
+    {
+        return WENT_BEYOND_END;
+    }
     return STACK_SUCCESS;
 }

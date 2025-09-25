@@ -2,12 +2,11 @@
 #include "libs.h"
 #include "common.h"
 
+#define INIT(name) Stack_t name = {.VarInfo = {#name, __FILE__, __func__, __LINE__}}
+
 int main()
 {
-    Stack_t stack = {.VarInfo = {.struct_name = "stack",
-                                 .file_name = __FILE__,
-                                 .function = __func__,
-                                 .line = __LINE__}};
+    INIT(stack);
 
     if (StackCtor(&stack, 5) != STACK_SUCCESS)
     {
@@ -36,52 +35,21 @@ int main()
     }
 
     item_t poped_item = 0;
+    for (int i = 0; i < 3; i++)
+    {
+        if (StackPop(&stack, &poped_item) != STACK_SUCCESS)
+        {
+            printf("ERROR");
+            return EXIT_FAILURE;
+        }
+        printf("poped_item = %d\n", poped_item);
+    }
 
-    if (StackPop(&stack, &poped_item) != STACK_SUCCESS)
+    stack.size = 100;
+    if (StackPush(&stack, 50) != STACK_SUCCESS)
     {
         return EXIT_FAILURE;
     }
-    printf("poped_item = %d\n", poped_item);
-
-    if (StackPop(&stack, &poped_item) != STACK_SUCCESS)
-    {
-        return EXIT_FAILURE;
-    }
-    printf("poped_item = %d\n", poped_item);
-
-    if (StackPop(&stack, &poped_item) != STACK_SUCCESS)
-    {
-        return EXIT_FAILURE;
-    }
-    printf("poped_item = %d\n", poped_item);
-
-    if (StackPop(&stack, &poped_item) != STACK_SUCCESS)
-    {
-        printf("ERROR");
-        return EXIT_FAILURE;
-    }
-    printf("poped_item = %d\n", poped_item);
-
-    if (StackPop(&stack, &poped_item) != STACK_SUCCESS)
-    {
-        printf("ERROR");
-        return EXIT_FAILURE;
-    }
-    printf("poped_item = %d\n", poped_item);
-
-    if (StackPop(&stack, &poped_item) != STACK_SUCCESS)
-    {
-        printf("ERROR");
-        return EXIT_FAILURE;
-    }
-    printf("poped_item = %d\n", poped_item);
-
-    if (StackPop(&stack, &poped_item) != STACK_SUCCESS)
-    {
-        printf("ERROR");
-        return EXIT_FAILURE;
-    }
-    printf("poped_item = %d\n", poped_item);
 
     fprintf(stderr, "\n<Programm ran without errors>");
     return EXIT_SUCCESS;

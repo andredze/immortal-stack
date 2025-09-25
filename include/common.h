@@ -8,6 +8,7 @@
                             return error; \
                         }
 
+const int CANARY_VALUE = 12285766;
 const int POISON = INT_MIN;
 const size_t SIZE_LIMIT = SIZE_MAX / 32 * 31;
 const size_t MAX_LINE_LEN = 200;
@@ -23,7 +24,10 @@ typedef enum StackErr {
     CAPACITY_EXCEEDS_LIMIT = 5,
     SIZE_EXCEEDS_CAPACITY = 6,
     CALLOC_ERROR = 7,
-    REALLOC_ERROR = 8
+    REALLOC_ERROR = 8,
+    WENT_BEYOND_START = 9,
+    WENT_BEYOND_END = 10,
+    FILE_OPENNING_ERROR = 11
 } StackErr_t;
 
 typedef struct VarInfo {

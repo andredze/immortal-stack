@@ -21,7 +21,7 @@ StackErr_t StackIsOk(Stack_t* stack,
 
 int StackErrToStr(StackErr_t error, const char* line[]);
 
-int StackDump(Stack_t* stack, StackErr_t error);
+StackErr_t StackDump(Stack_t* stack, StackErr_t error);
 
 StackErr_t StackVerify(Stack_t* stack);
 

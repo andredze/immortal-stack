@@ -1,20 +1,17 @@
-from StackPop at source/stack.cpp:109
-ERROR 4: Size exceeded limit (possibly set to the negative value)
-stack [000000C5CD9FF7F0]
+from StackPush at source/stack.cpp:77
+ERROR 6: Size exceeded capacity
+stack [0000000E545FF930]
 {
-	size = 18446744073709551615;
-	capacity = 5;
-	data [0000027D36EEF220];
+	size = 100;
+	capacity = 7;
+	data [00000206F2DE9B70];
 	{
-		*[0] = -2147483648;
-		*[1] = -2147483648;
-		*[2] = -2147483648;
-		*[3] = -2147483648;
-		*[4] = -2147483648;
-		*[5] = 0;
-		*[6] = -1410180776;
-		*[7] = -1946152704;
-		*[8] = 1599292762;
-		*[9] = 1111576133;
+		 [0] = 12285766 (CANARY);
+		*[1] = 10;
+		*[2] = 20;
+		 [3] = -2147483648 (POISON);
+		 [4] = -2147483648 (POISON);
+		 [5] = -2147483648 (POISON);
+		 [6] = 12285766 (CANARY);
 	}
 }
