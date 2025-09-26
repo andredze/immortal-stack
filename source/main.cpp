@@ -39,7 +39,6 @@ int main()
     {
         if (StackPop(&stack, &poped_item) != STACK_SUCCESS)
         {
-            printf("ERROR");
             return EXIT_FAILURE;
         }
         printf("poped_item = %d\n", poped_item);

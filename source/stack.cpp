@@ -6,16 +6,26 @@
 #define DEBUG_ACTIVE 0
 #endif
 
+#define STACK_OK(stack) if ((error = StackIsOk(stack, __FILE__, __func__, __LINE__)) != STACK_SUCCESS) \
+                        { \
+                            return error; \
+                        }
+
 StackErr_t StackCtor(Stack_t* stack, size_t capacity)
 {
-    stack->capacity = capacity + 2;
+    if (stack == NULL)
+    {
+        fprintf(stderr, "<Stack is null pointer>");
+        return NULL_STACK;
+    }
+    stack->capacity = capacity;
 
     if (stack->capacity > SIZE_LIMIT)
     {
         return CAPACITY_EXCEEDS_LIMIT;
     }
 
-    item_t* data = (item_t*) calloc(stack->capacity, sizeof(item_t));
+    item_t* data = (item_t*) calloc(capacity + 2, sizeof(item_t));
     if (data == NULL)
     {
         fprintf(stderr, "Memory allocation failed");
@@ -23,7 +33,7 @@ StackErr_t StackCtor(Stack_t* stack, size_t capacity)
     }
     data[0] = CANARY_VALUE;
     data[capacity + 1] = CANARY_VALUE;
-    stack->size = 1;
+    stack->size = 0;
 
     for (size_t i = 1; i < capacity + 1; i++)
     {
@@ -52,7 +62,7 @@ StackErr_t StackRealloc(Stack_t* stack)
     stack->capacity = stack->capacity * 3 / 2 + 1;
     item_t* data = stack->data;
 
-    data = (item_t*) realloc(data, stack->capacity);
+    data = (item_t*) realloc(data, stack->capacity + 2);
     if (data == NULL)
     {
         fprintf(stderr, "Memory reallocation failed");
@@ -78,14 +88,14 @@ StackErr_t StackPush(Stack_t* stack, item_t item)
     }
 
     // fprintf(stderr, "stack size = %zu\n", stack->size);
-    if (stack->size >= stack->capacity)
+    if (stack->size == stack->capacity)
     {
         if ((error = StackRealloc(stack)) != STACK_SUCCESS)
         {
             return error;
         }
     }
-    stack->data[stack->size++] = item;
+    stack->data[1 + stack->size++] = item;
     // fprintf(stderr, "pushed = %d\n", item);
     // fprintf(stderr, "stack size = %zu\n", stack->size);
 
@@ -106,8 +116,13 @@ StackErr_t StackPop(Stack_t* stack, item_t* item)
     }
 
     // fprintf(stderr, "stack size = %zu\n", stack->size);
-    *item = stack->data[--stack->size];
-    stack->data[stack->size] = POISON;
+    if (stack->size == 0)
+    {
+        fprintf(stderr, "<Pop is impossible with zero size>");
+        return SIZE_IS_ZERO;
+    }
+    *item = stack->data[--stack->size + 1];
+    stack->data[stack->size + 1] = POISON;
     // fprintf(stderr, "stack size = %zu\n", stack->size);
 
     if (DEBUG_ACTIVE)
@@ -187,6 +202,9 @@ int StackErrToStr(StackErr_t error, const char** line)
         case FILE_OPENNING_ERROR:
             *line = "Opening the log file failed";
             break;
+        case SIZE_IS_ZERO:
+            *line = "Size equals zero";
+            break;
         default:
             return 1;
     }
@@ -262,7 +280,7 @@ StackErr_t StackDump(Stack_t* stack, StackErr_t error)
         fprintf(stream, "\t\t*[%zu] = %d;\n",
                         i, stack->data[i]);
     }
-    for (size_t j = size; j < capacity - 1; j++)
+    for (size_t j = size; j < capacity + 1; j++)
     {
         fprintf(stream, "\t\t [%zu] = %d (POISON);\n",
                         j, stack->data[j]);
@@ -270,7 +288,7 @@ StackErr_t StackDump(Stack_t* stack, StackErr_t error)
     fprintf(stream, "\t\t [%zu] = %d (CANARY);\n"
                     "\t}\n"
                     "}",
-                    capacity - 1, stack->data[capacity - 1]);
+                    capacity + 1, stack->data[capacity + 1]);
     fclose(stream);
 
     return STACK_SUCCESS;
@@ -278,18 +296,18 @@ StackErr_t StackDump(Stack_t* stack, StackErr_t error)
 
 StackErr_t StackVerify(Stack_t* stack)
 {
-    size_t size = stack->size;
-    size_t capacity = stack->capacity;
-    item_t* data = stack->data;
-
     if (stack == NULL)
     {
         return NULL_STACK;
     }
-    if (data == NULL)
+    if (stack->data == NULL)
     {
         return NULL_DATA;
     }
+    size_t size = stack->size;
+    size_t capacity = stack->capacity;
+    item_t* data = stack->data;
+
     // if (capacity == 0)
     // {
     //     return ZERO_CAPACITY;
@@ -302,7 +320,7 @@ StackErr_t StackVerify(Stack_t* stack)
     {
         return CAPACITY_EXCEEDS_LIMIT;
     }
-    if (size > capacity + 1)
+    if (size > capacity)
     {
         return SIZE_EXCEEDS_CAPACITY;
     }
@@ -310,7 +328,7 @@ StackErr_t StackVerify(Stack_t* stack)
     {
         return WENT_BEYOND_START;
     }
-    if (data[capacity - 1] != CANARY_VALUE)
+    if (data[capacity + 1] != CANARY_VALUE)
     {
         return WENT_BEYOND_END;
     }

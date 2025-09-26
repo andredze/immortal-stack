@@ -3,11 +3,6 @@
 
 #include "libs.h"
 
-#define STACK_OK(stack) if ((error = StackIsOk(stack, __FILE__, __func__, __LINE__)) != STACK_SUCCESS) \
-                        { \
-                            return error; \
-                        }
-
 const int CANARY_VALUE = 12285766;
 const int POISON = INT_MIN;
 const size_t SIZE_LIMIT = SIZE_MAX / 32 * 31;
@@ -27,7 +22,8 @@ typedef enum StackErr {
     REALLOC_ERROR = 8,
     WENT_BEYOND_START = 9,
     WENT_BEYOND_END = 10,
-    FILE_OPENNING_ERROR = 11
+    FILE_OPENNING_ERROR = 11,
+    SIZE_IS_ZERO = 12
 } StackErr_t;
 
 typedef struct VarInfo {
