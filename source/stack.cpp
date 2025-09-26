@@ -96,7 +96,7 @@ StackErr_t StackPush(Stack_t* stack, item_t item)
         }
     }
     stack->data[1 + stack->size++] = item;
-    // fprintf(stderr, "pushed = %d\n", item);
+    // fprintf(stderr, "pushed = " SPEC "\n", item);
     // fprintf(stderr, "stack size = %zu\n", stack->size);
 
     if (DEBUG_ACTIVE)
@@ -174,9 +174,6 @@ int StackErrToStr(StackErr_t error, const char** line)
             break;
         case NULL_DATA:
             *line = "Pointer to the stack data is NULL";
-            break;
-        case ZERO_CAPACITY:
-            *line = "Capacity equals zero";
             break;
         case SIZE_EXCEEDS_LIMIT:
             *line = "Size exceeded limit (possibly set to the negative value)";
@@ -269,7 +266,7 @@ StackErr_t StackDump(Stack_t* stack, StackErr_t error)
         size = capacity - 1;
     }
 
-    fprintf(stream, "\t\t [0] = %d (CANARY);\n", stack->data[0]);
+    fprintf(stream, "\t\t [0] = " SPEC " (CANARY);\n", stack->data[0]);
     for (size_t i = 1; i < size; i++)
     {
         if (data[i] == POISON)
@@ -277,15 +274,15 @@ StackErr_t StackDump(Stack_t* stack, StackErr_t error)
             size = i;
             break;
         }
-        fprintf(stream, "\t\t*[%zu] = %d;\n",
+        fprintf(stream, "\t\t*[%zu] = " SPEC ";\n",
                         i, stack->data[i]);
     }
     for (size_t j = size; j < capacity + 1; j++)
     {
-        fprintf(stream, "\t\t [%zu] = %d (POISON);\n",
+        fprintf(stream, "\t\t [%zu] = " SPEC " (POISON);\n",
                         j, stack->data[j]);
     }
-    fprintf(stream, "\t\t [%zu] = %d (CANARY);\n"
+    fprintf(stream, "\t\t [%zu] = " SPEC " (CANARY);\n"
                     "\t}\n"
                     "}",
                     capacity + 1, stack->data[capacity + 1]);
@@ -308,10 +305,6 @@ StackErr_t StackVerify(Stack_t* stack)
     size_t capacity = stack->capacity;
     item_t* data = stack->data;
 
-    // if (capacity == 0)
-    // {
-    //     return ZERO_CAPACITY;
-    // }
     if (size > SIZE_LIMIT)
     {
         return SIZE_EXCEEDS_LIMIT;

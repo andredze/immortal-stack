@@ -1,10 +1,10 @@
 from StackPush at source/stack.cpp:87
-ERROR 6: Size exceeded capacity
-stack [0000008ADA3FF7D0]
+ERROR 5: Size exceeded capacity
+stack [000000E4B67FF980]
 {
 	size = 100;
 	capacity = 5;
-	data [000001C4E09D9A80];
+	data [000001F3FB6C9C00];
 	{
 		 [0] = 12285766 (CANARY);
 		*[1] = 10;

@@ -3,27 +3,29 @@
 
 #include "libs.h"
 
-const int CANARY_VALUE = 12285766;
-const int POISON = INT_MIN;
+const int CANARY_VALUE_INT = 12285766;
+const int POISON_INT = INT_MIN;
 const size_t SIZE_LIMIT = SIZE_MAX / 32 * 31;
 const size_t MAX_LINE_LEN = 200;
 
 typedef int item_t;
+const item_t CANARY_VALUE = CANARY_VALUE_INT;
+const item_t POISON = POISON_INT;
+#define SPEC "%d"
 
 typedef enum StackErr {
     STACK_SUCCESS = 0,
     NULL_STACK = 1,
     NULL_DATA = 2,
-    ZERO_CAPACITY = 3,
-    SIZE_EXCEEDS_LIMIT = 4,
-    CAPACITY_EXCEEDS_LIMIT = 5,
-    SIZE_EXCEEDS_CAPACITY = 6,
-    CALLOC_ERROR = 7,
-    REALLOC_ERROR = 8,
-    WENT_BEYOND_START = 9,
-    WENT_BEYOND_END = 10,
-    FILE_OPENNING_ERROR = 11,
-    SIZE_IS_ZERO = 12
+    SIZE_EXCEEDS_LIMIT = 3,
+    CAPACITY_EXCEEDS_LIMIT = 4,
+    SIZE_EXCEEDS_CAPACITY = 5,
+    CALLOC_ERROR = 6,
+    REALLOC_ERROR = 7,
+    WENT_BEYOND_START = 8,
+    WENT_BEYOND_END = 9,
+    FILE_OPENNING_ERROR = 10,
+    SIZE_IS_ZERO = 11
 } StackErr_t;
 
 typedef struct VarInfo {

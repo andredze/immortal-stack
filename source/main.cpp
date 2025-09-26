@@ -41,7 +41,7 @@ int main()
         {
             return EXIT_FAILURE;
         }
-        printf("poped_item = %d\n", poped_item);
+        printf("poped_item = " SPEC "\n", poped_item);
     }
 
     stack.size = 100;
