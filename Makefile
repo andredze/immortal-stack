@@ -13,7 +13,9 @@ CXXFLAGS =  -Iinclude \
 
 SOURCES = source/main.cpp \
 		  source/stack.cpp \
-		  source/maths.cpp
+		  source/maths.cpp \
+		  source/input.cpp \
+		  source/calculator.cpp
 
 EXECUTABLE = run.exe
 

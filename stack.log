@@ -1,17 +1,17 @@
-from StackPush at source/stack.cpp:87
+reason: Stack didn't pass verifier at the start of function
+from StackPush at source/stack.cpp:76
 ERROR 5: Size exceeded capacity
-stack [000000A9029FF6B0]
+stack [0000005271BFFE10]
 {
 	size = 100;
-	capacity = 5;
-	data [000001BCECBA9A50];
+	capacity = 4;
+	data [000001854F9EA4E0];
 	{
 		 [0] = -1410617875 (CANARY);
-		*[1] = 10;
-		*[2] = 20;
+		 [1] = -558908742 (POISON);
+		 [2] = -558908742 (POISON);
 		 [3] = -558908742 (POISON);
 		 [4] = -558908742 (POISON);
-		 [5] = -558908742 (POISON);
-		 [6] = -1410617875 (CANARY);
+		 [5] = -1410617875 (CANARY);
 	}
 }

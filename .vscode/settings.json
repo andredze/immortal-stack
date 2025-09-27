@@ -1,6 +1,13 @@
 {
     "files.associations": {
         "cstdlib": "cpp",
-        "vector": "cpp"
+        "vector": "cpp",
+        "array": "cpp",
+        "string_view": "cpp",
+        "format": "cpp",
+        "initializer_list": "cpp",
+        "ranges": "cpp",
+        "span": "cpp",
+        "functional": "cpp"
     }
 }

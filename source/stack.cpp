@@ -1,19 +1,21 @@
 #include "stack.h"
 
 #ifdef DEBUG
-#define STACK_OK(stack) if ((error = StackIsOk(stack, __FILE__, __func__, __LINE__)) != STACK_SUCCESS) \
-                        { \
-                            return error; \
-                        }
+#define STACK_OK(stack, reason) \
+        if ((error = StackIsOk(stack, __FILE__, __func__, __LINE__, reason)) \
+                   != STACK_SUCCESS) \
+        { \
+            return error; \
+        }
 #else
-#define STACK_OK(stack) ;
+#define STACK_OK(stack, reason) ;
 #endif
 
 StackErr_t StackCtor(Stack_t* stack, size_t capacity)
 {
     if (stack == NULL)
     {
-        fprintf(stderr, "<Stack is null pointer>");
+        DPRINTF("<Stack is null pointer>");
         return NULL_STACK;
     }
     stack->capacity = capacity;
@@ -26,7 +28,7 @@ StackErr_t StackCtor(Stack_t* stack, size_t capacity)
     item_t* data = (item_t*) calloc(capacity + 2, sizeof(item_t));
     if (data == NULL)
     {
-        fprintf(stderr, "Memory allocation failed");
+        DPRINTF("Memory allocation failed");
         return CALLOC_ERROR;
     }
     data[0] = CANARY_VALUE;
@@ -41,7 +43,7 @@ StackErr_t StackCtor(Stack_t* stack, size_t capacity)
     stack->data = data;
 
     StackErr_t error = STACK_SUCCESS;
-    STACK_OK(stack);
+    STACK_OK(stack, reason_end);
 
     return STACK_SUCCESS;
 }
@@ -49,7 +51,7 @@ StackErr_t StackCtor(Stack_t* stack, size_t capacity)
 StackErr_t StackRealloc(Stack_t* stack)
 {
     StackErr_t error = STACK_SUCCESS;
-    STACK_OK(stack);
+    STACK_OK(stack, reason_start);
 
     stack->capacity = stack->capacity * 2;
     item_t* data = stack->data;
@@ -57,13 +59,13 @@ StackErr_t StackRealloc(Stack_t* stack)
     data = (item_t*) realloc(data, stack->capacity + 2);
     if (data == NULL)
     {
-        fprintf(stderr, "Memory reallocation failed");
+        DPRINTF("Memory reallocation failed");
         return REALLOC_ERROR;
     }
     data[0] = CANARY_VALUE;
     data[stack->capacity + 1] = CANARY_VALUE;
 
-    STACK_OK(stack);
+    STACK_OK(stack, reason_end);
 
     return STACK_SUCCESS;
 }
@@ -71,9 +73,8 @@ StackErr_t StackRealloc(Stack_t* stack)
 StackErr_t StackPush(Stack_t* stack, item_t item)
 {
     StackErr_t error = STACK_SUCCESS;
-    STACK_OK(stack);
+    STACK_OK(stack, reason_start);
 
-    // fprintf(stderr, "stack size = %zu\n", stack->size);
     if (stack->size == stack->capacity)
     {
         if ((error = StackRealloc(stack)) != STACK_SUCCESS)
@@ -82,10 +83,10 @@ StackErr_t StackPush(Stack_t* stack, item_t item)
         }
     }
     stack->data[1 + stack->size++] = item;
-    // fprintf(stderr, "pushed = " SPEC "\n", item);
-    // fprintf(stderr, "stack size = %zu\n", stack->size);
 
-    STACK_OK(stack);
+    DPRINTF("pushed = " SPEC "\n", item);
+
+    STACK_OK(stack, reason_end);
 
     return STACK_SUCCESS;
 }
@@ -93,19 +94,19 @@ StackErr_t StackPush(Stack_t* stack, item_t item)
 StackErr_t StackPop(Stack_t* stack, item_t* item)
 {
     StackErr_t error = STACK_SUCCESS;
-    STACK_OK(stack);
+    STACK_OK(stack, reason_start);
 
-    // fprintf(stderr, "stack size = %zu\n", stack->size);
     if (stack->size == 0)
     {
-        fprintf(stderr, "<Pop is impossible with zero size>");
+        DPRINTF("<Pop is impossible with zero size>\n");
         return SIZE_IS_ZERO;
     }
     *item = stack->data[--stack->size + 1];
     stack->data[stack->size + 1] = POISON;
-    // fprintf(stderr, "stack size = %zu\n", stack->size);
 
-    STACK_OK(stack);
+    DPRINTF("poped = " SPEC "\n", *item);
+
+    STACK_OK(stack, reason_end);
 
     return STACK_SUCCESS;
 }
@@ -113,7 +114,7 @@ StackErr_t StackPop(Stack_t* stack, item_t* item)
 StackErr_t StackDtor(Stack_t* stack)
 {
     StackErr_t error = STACK_SUCCESS;
-    STACK_OK(stack);
+    STACK_OK(stack, reason_start);
 
     free(stack->data);
     stack->data = NULL;
@@ -124,7 +125,8 @@ StackErr_t StackDtor(Stack_t* stack)
 StackErr_t StackIsOk(Stack_t* stack,
                      const char* file_name,
                      const char* function,
-                     int line)
+                     int line,
+                     const char* reason_of_calling)
 {
     stack->VarInfo.file_name = file_name;
     stack->VarInfo.function = function;
@@ -134,8 +136,9 @@ StackErr_t StackIsOk(Stack_t* stack,
     StackErr_t dump_return = STACK_SUCCESS;
     if ((error = StackVerify(stack)) != STACK_SUCCESS)
     {
-        fprintf(stderr, "<Error occurred>");
-        if ((dump_return = StackDump(stack, error)) != STACK_SUCCESS)
+        DPRINTF("<Error occurred>");
+        if ((dump_return = StackDump(stack, error, reason_of_calling)) \
+                         != STACK_SUCCESS)
         {
             return dump_return;
         }
@@ -189,12 +192,15 @@ int StackErrToStr(StackErr_t error, const char** line)
     return 0;
 }
 
-StackErr_t StackDump(Stack_t* stack, StackErr_t error)
+StackErr_t StackDump(Stack_t* stack, StackErr_t error,
+                     const char* reason_of_calling)
 {
+    assert(reason_of_calling != NULL);
+
     FILE* stream = fopen("stack.log", "w");
     if (stream == NULL)
     {
-        fprintf(stderr, "Can not open stream: stack.log");
+        DPRINTF("Can not open stream: stack.log");
         return FILE_OPENNING_ERROR;
     }
 
@@ -207,12 +213,14 @@ StackErr_t StackDump(Stack_t* stack, StackErr_t error)
         return STACK_SUCCESS;
     }
 
-    fprintf(stream, "from %s at %s:%d\n"
+    fprintf(stream, "reason: %s\n"
+                    "from %s at %s:%d\n"
                     "ERROR %d: %s\n"
                     "%s [%p]\n{\n"
                     "\tsize = %zu;\n"
                     "\tcapacity = %zu;\n"
                     "\tdata [%p];\n\t{\n",
+                    reason_of_calling,
                     stack->VarInfo.function,
                     stack->VarInfo.file_name,
                     stack->VarInfo.line,

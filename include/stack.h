@@ -7,6 +7,18 @@
 #include <string.h>
 #include <assert.h>
 
+#ifdef DEBUG
+    #define INIT_STACK(name) Stack_t name = {.VarInfo = {#name, __FILE__, __func__, __LINE__}}
+#else
+    #define INIT_STACK(name) Stack_t name = {}
+#endif
+
+#ifdef DEBUG
+    #define DPRINTF(...) fprintf(stderr, __VA_ARGS__);
+#else
+    #define DPRINTF(...) ;
+#endif
+
 const size_t SIZE_LIMIT = SIZE_MAX / 32 * 31;
 
 const int CANARY_VALUE_INT = 0xABEBADED;
@@ -16,6 +28,9 @@ typedef int item_t;
 const item_t CANARY_VALUE = CANARY_VALUE_INT;
 const item_t POISON = POISON_INT;
 #define SPEC "%d"
+
+const char* const reason_start = "Stack didn't pass verifier at the start of function";
+const char* const reason_end = "Stack didn't pass verifier at the end of function";
 
 typedef enum StackErr {
     STACK_SUCCESS = 0,
@@ -32,14 +47,12 @@ typedef enum StackErr {
     SIZE_IS_ZERO = 11
 } StackErr_t;
 
-#ifdef DEBUG
 typedef struct VarInfo {
     const char* struct_name;
     const char* file_name;
     const char* function;
     int line;
 } VarInfo_t;
-#endif
 
 typedef struct Stack {
     item_t* data;
@@ -63,11 +76,13 @@ StackErr_t StackDtor(Stack_t* stack);
 StackErr_t StackIsOk(Stack_t* stack,
                      const char* file_name,
                      const char* function,
-                     int line);
+                     int line,
+                     const char* reason_of_calling);
 
 int StackErrToStr(StackErr_t error, const char* line[]);
 
-StackErr_t StackDump(Stack_t* stack, StackErr_t error);
+StackErr_t StackDump(Stack_t* stack, StackErr_t error,
+                     const char* reason_of_calling);
 
 StackErr_t StackVerify(Stack_t* stack);
 
