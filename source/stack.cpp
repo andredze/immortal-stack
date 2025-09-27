@@ -1,15 +1,13 @@
 #include "stack.h"
 
 #ifdef DEBUG
-#define DEBUG_ACTIVE 1
-#else
-#define DEBUG_ACTIVE 0
-#endif
-
 #define STACK_OK(stack) if ((error = StackIsOk(stack, __FILE__, __func__, __LINE__)) != STACK_SUCCESS) \
                         { \
                             return error; \
                         }
+#else
+#define STACK_OK(stack) ;
+#endif
 
 StackErr_t StackCtor(Stack_t* stack, size_t capacity)
 {
@@ -43,10 +41,7 @@ StackErr_t StackCtor(Stack_t* stack, size_t capacity)
     stack->data = data;
 
     StackErr_t error = STACK_SUCCESS;
-    if (DEBUG_ACTIVE)
-    {
-        STACK_OK(stack);
-    }
+    STACK_OK(stack);
 
     return STACK_SUCCESS;
 }
@@ -54,12 +49,9 @@ StackErr_t StackCtor(Stack_t* stack, size_t capacity)
 StackErr_t StackRealloc(Stack_t* stack)
 {
     StackErr_t error = STACK_SUCCESS;
-    if (DEBUG_ACTIVE)
-    {
-        STACK_OK(stack);
-    }
+    STACK_OK(stack);
 
-    stack->capacity = stack->capacity * 3 / 2 + 1;
+    stack->capacity = stack->capacity * 2;
     item_t* data = stack->data;
 
     data = (item_t*) realloc(data, stack->capacity + 2);
@@ -71,10 +63,7 @@ StackErr_t StackRealloc(Stack_t* stack)
     data[0] = CANARY_VALUE;
     data[stack->capacity + 1] = CANARY_VALUE;
 
-    if (DEBUG_ACTIVE)
-    {
-        STACK_OK(stack);
-    }
+    STACK_OK(stack);
 
     return STACK_SUCCESS;
 }
@@ -82,10 +71,7 @@ StackErr_t StackRealloc(Stack_t* stack)
 StackErr_t StackPush(Stack_t* stack, item_t item)
 {
     StackErr_t error = STACK_SUCCESS;
-    if (DEBUG_ACTIVE)
-    {
-        STACK_OK(stack);
-    }
+    STACK_OK(stack);
 
     // fprintf(stderr, "stack size = %zu\n", stack->size);
     if (stack->size == stack->capacity)
@@ -99,10 +85,7 @@ StackErr_t StackPush(Stack_t* stack, item_t item)
     // fprintf(stderr, "pushed = " SPEC "\n", item);
     // fprintf(stderr, "stack size = %zu\n", stack->size);
 
-    if (DEBUG_ACTIVE)
-    {
-        STACK_OK(stack);
-    }
+    STACK_OK(stack);
 
     return STACK_SUCCESS;
 }
@@ -110,10 +93,7 @@ StackErr_t StackPush(Stack_t* stack, item_t item)
 StackErr_t StackPop(Stack_t* stack, item_t* item)
 {
     StackErr_t error = STACK_SUCCESS;
-    if (DEBUG_ACTIVE)
-    {
-        STACK_OK(stack);
-    }
+    STACK_OK(stack);
 
     // fprintf(stderr, "stack size = %zu\n", stack->size);
     if (stack->size == 0)
@@ -125,18 +105,19 @@ StackErr_t StackPop(Stack_t* stack, item_t* item)
     stack->data[stack->size + 1] = POISON;
     // fprintf(stderr, "stack size = %zu\n", stack->size);
 
-    if (DEBUG_ACTIVE)
-    {
-        STACK_OK(stack);
-    }
+    STACK_OK(stack);
 
     return STACK_SUCCESS;
 }
 
 StackErr_t StackDtor(Stack_t* stack)
 {
+    StackErr_t error = STACK_SUCCESS;
+    STACK_OK(stack);
+
     free(stack->data);
     stack->data = NULL;
+
     return STACK_SUCCESS;
 }
 
@@ -252,10 +233,11 @@ StackErr_t StackDump(Stack_t* stack, StackErr_t error)
     size_t size = stack->size;
     size_t capacity = stack->capacity;
     item_t* data = stack->data;
-    // if size/capacity is wrong, output only 20 first elements
+
+    // if size/capacity is wrong, output only 16 first elements
     if (error == SIZE_EXCEEDS_LIMIT)
     {
-        size = 10;
+        size = 16;
     }
     if (error == CAPACITY_EXCEEDS_LIMIT)
     {
@@ -266,7 +248,7 @@ StackErr_t StackDump(Stack_t* stack, StackErr_t error)
         size = capacity - 1;
     }
 
-    fprintf(stream, "\t\t [0] = " SPEC " (CANARY);\n", stack->data[0]);
+    fprintf(stream, "\t\t [0] = " SPEC " (CANARY);\n", data[0]);
     for (size_t i = 1; i < size; i++)
     {
         if (data[i] == POISON)
@@ -274,8 +256,7 @@ StackErr_t StackDump(Stack_t* stack, StackErr_t error)
             size = i;
             break;
         }
-        fprintf(stream, "\t\t*[%zu] = " SPEC ";\n",
-                        i, stack->data[i]);
+        fprintf(stream, "\t\t*[%zu] = " SPEC ";\n", i, data[i]);
     }
     for (size_t j = size; j < capacity + 1; j++)
     {
@@ -301,27 +282,23 @@ StackErr_t StackVerify(Stack_t* stack)
     {
         return NULL_DATA;
     }
-    size_t size = stack->size;
-    size_t capacity = stack->capacity;
-    item_t* data = stack->data;
-
-    if (size > SIZE_LIMIT)
+    if (stack->size > SIZE_LIMIT)
     {
         return SIZE_EXCEEDS_LIMIT;
     }
-    if (capacity > SIZE_LIMIT)
+    if (stack->capacity > SIZE_LIMIT)
     {
         return CAPACITY_EXCEEDS_LIMIT;
     }
-    if (size > capacity)
+    if (stack->size > stack->capacity)
     {
         return SIZE_EXCEEDS_CAPACITY;
     }
-    if (data[0] != CANARY_VALUE)
+    if (stack->data[0] != CANARY_VALUE)
     {
         return WENT_BEYOND_START;
     }
-    if (data[capacity + 1] != CANARY_VALUE)
+    if (stack->data[stack->capacity + 1] != CANARY_VALUE)
     {
         return WENT_BEYOND_END;
     }

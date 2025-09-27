@@ -1,17 +1,17 @@
 from StackPush at source/stack.cpp:87
 ERROR 5: Size exceeded capacity
-stack [000000E4B67FF980]
+stack [000000A9029FF6B0]
 {
 	size = 100;
 	capacity = 5;
-	data [000001F3FB6C9C00];
+	data [000001BCECBA9A50];
 	{
-		 [0] = 12285766 (CANARY);
+		 [0] = -1410617875 (CANARY);
 		*[1] = 10;
 		*[2] = 20;
-		 [3] = -2147483648 (POISON);
-		 [4] = -2147483648 (POISON);
-		 [5] = -2147483648 (POISON);
-		 [6] = 12285766 (CANARY);
+		 [3] = -558908742 (POISON);
+		 [4] = -558908742 (POISON);
+		 [5] = -558908742 (POISON);
+		 [6] = -1410617875 (CANARY);
 	}
 }

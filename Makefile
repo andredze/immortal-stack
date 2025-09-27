@@ -12,7 +12,8 @@ CXXFLAGS =  -Iinclude \
 			-D_EJUDGE_CLIENT_SIDE
 
 SOURCES = source/main.cpp \
-		  source/stack.cpp
+		  source/stack.cpp \
+		  source/maths.cpp
 
 EXECUTABLE = run.exe
 
