@@ -8,6 +8,7 @@
         "initializer_list": "cpp",
         "ranges": "cpp",
         "span": "cpp",
-        "functional": "cpp"
+        "functional": "cpp",
+        "optional": "cpp"
     }
 }

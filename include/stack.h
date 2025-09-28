@@ -41,10 +41,11 @@ typedef enum StackErr {
     SIZE_EXCEEDS_CAPACITY = 5,
     CALLOC_ERROR = 6,
     REALLOC_ERROR = 7,
-    WENT_BEYOND_START = 8,
-    WENT_BEYOND_END = 9,
+    START_CANARY_RUINED = 8,
+    END_CANARY_RUINED = 9,
     FILE_OPENNING_ERROR = 10,
-    SIZE_IS_ZERO = 11
+    SIZE_IS_ZERO = 11,
+    HASH_CHANGED = 12
 } StackErr_t;
 
 typedef struct VarInfo {
@@ -58,6 +59,7 @@ typedef struct Stack {
     item_t* data;
     size_t size;
     size_t capacity;
+    size_t hash;
 #ifdef DEBUG
     VarInfo_t VarInfo;
 #endif
@@ -85,5 +87,11 @@ StackErr_t StackDump(Stack_t* stack, StackErr_t error,
                      const char* reason_of_calling);
 
 StackErr_t StackVerify(Stack_t* stack);
+
+StackErr_t StackCheckCanaries(Stack_t* stack);
+
+StackErr_t StackCheckHash(Stack_t* stack);
+
+size_t Hash(item_t* data);
 
 #endif /* STACK_H */

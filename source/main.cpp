@@ -23,7 +23,7 @@ int main()
     item_t poped_item = 0;
     StackErr_t pop_return = STACK_SUCCESS;
 
-    for (int i = 0; i < 3; i++)
+    for (int i = 0; i < 1; i++)
     {
         if ((pop_return = StackPop(&stack, &poped_item)) != STACK_SUCCESS &&
              pop_return != SIZE_IS_ZERO)
@@ -36,7 +36,13 @@ int main()
         }
     }
 
-    stack.size = 100;
+    // stack.data[1] = 10;
+    if (StackPush(&stack, 50) != STACK_SUCCESS)
+    {
+        return EXIT_FAILURE;
+    }
+
+    // stack.size = 100;
     if (StackPush(&stack, 50) != STACK_SUCCESS)
     {
         return EXIT_FAILURE;

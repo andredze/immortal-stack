@@ -2,13 +2,19 @@
 
 #ifdef DEBUG
 #define STACK_OK(stack, reason) \
-        if ((error = StackIsOk(stack, __FILE__, __func__, __LINE__, reason)) \
-                   != STACK_SUCCESS) \
-        { \
-            return error; \
-        }
+        do { \
+            StackErr_t error = STACK_SUCCESS; \
+            if ((error = StackIsOk(stack, __FILE__, __func__, __LINE__, reason)) \
+                       != STACK_SUCCESS) \
+            { \
+                return error; \
+            } \
+        } while (0);
 #else
-#define STACK_OK(stack, reason) ;
+#define STACK_OK(stack, reason) if (StackCheckHash(stack) != STACK_SUCCESS) \
+                                { \
+                                    return HASH_CHANGED; \
+                                }
 #endif
 
 StackErr_t StackCtor(Stack_t* stack, size_t capacity)
@@ -41,8 +47,8 @@ StackErr_t StackCtor(Stack_t* stack, size_t capacity)
     }
 
     stack->data = data;
+    stack->hash = Hash(stack->data);
 
-    StackErr_t error = STACK_SUCCESS;
     STACK_OK(stack, reason_end);
 
     return STACK_SUCCESS;
@@ -50,10 +56,10 @@ StackErr_t StackCtor(Stack_t* stack, size_t capacity)
 
 StackErr_t StackRealloc(Stack_t* stack)
 {
-    StackErr_t error = STACK_SUCCESS;
     STACK_OK(stack, reason_start);
 
-    stack->capacity = stack->capacity * 2;
+    size_t old_capacity = stack->capacity;
+    stack->capacity = old_capacity * 2;
     item_t* data = stack->data;
 
     data = (item_t*) realloc(data, stack->capacity + 2);
@@ -62,9 +68,16 @@ StackErr_t StackRealloc(Stack_t* stack)
         DPRINTF("Memory reallocation failed");
         return REALLOC_ERROR;
     }
+
     data[0] = CANARY_VALUE;
     data[stack->capacity + 1] = CANARY_VALUE;
 
+    for (size_t i = old_capacity + 1; i < stack->capacity + 1; i++)
+    {
+        data[i] = POISON;
+    }
+
+    stack->hash = Hash(stack->data);
     STACK_OK(stack, reason_end);
 
     return STACK_SUCCESS;
@@ -72,20 +85,20 @@ StackErr_t StackRealloc(Stack_t* stack)
 
 StackErr_t StackPush(Stack_t* stack, item_t item)
 {
-    StackErr_t error = STACK_SUCCESS;
     STACK_OK(stack, reason_start);
 
     if (stack->size == stack->capacity)
     {
-        if ((error = StackRealloc(stack)) != STACK_SUCCESS)
+        if (StackRealloc(stack) != STACK_SUCCESS)
         {
-            return error;
+            return REALLOC_ERROR;
         }
     }
     stack->data[1 + stack->size++] = item;
 
     DPRINTF("pushed = " SPEC "\n", item);
 
+    stack->hash = Hash(stack->data);
     STACK_OK(stack, reason_end);
 
     return STACK_SUCCESS;
@@ -93,7 +106,6 @@ StackErr_t StackPush(Stack_t* stack, item_t item)
 
 StackErr_t StackPop(Stack_t* stack, item_t* item)
 {
-    StackErr_t error = STACK_SUCCESS;
     STACK_OK(stack, reason_start);
 
     if (stack->size == 0)
@@ -106,6 +118,7 @@ StackErr_t StackPop(Stack_t* stack, item_t* item)
 
     DPRINTF("poped = " SPEC "\n", *item);
 
+    stack->hash = Hash(stack->data);
     STACK_OK(stack, reason_end);
 
     return STACK_SUCCESS;
@@ -113,7 +126,6 @@ StackErr_t StackPop(Stack_t* stack, item_t* item)
 
 StackErr_t StackDtor(Stack_t* stack)
 {
-    StackErr_t error = STACK_SUCCESS;
     STACK_OK(stack, reason_start);
 
     free(stack->data);
@@ -122,6 +134,7 @@ StackErr_t StackDtor(Stack_t* stack)
     return STACK_SUCCESS;
 }
 
+#ifdef DEBUG
 StackErr_t StackIsOk(Stack_t* stack,
                      const char* file_name,
                      const char* function,
@@ -174,10 +187,10 @@ int StackErrToStr(StackErr_t error, const char** line)
         case REALLOC_ERROR:
             *line = "Memory reallocation failed";
             break;
-        case WENT_BEYOND_START:
+        case START_CANARY_RUINED:
             *line = "Start boundary value was changed";
             break;
-        case WENT_BEYOND_END:
+        case END_CANARY_RUINED:
             *line = "End boundary value was changed";
             break;
         case FILE_OPENNING_ERROR:
@@ -185,6 +198,9 @@ int StackErrToStr(StackErr_t error, const char** line)
             break;
         case SIZE_IS_ZERO:
             *line = "Size equals zero";
+            break;
+        case HASH_CHANGED:
+            *line = "Hash changed it's value";
             break;
         default:
             return 1;
@@ -290,6 +306,10 @@ StackErr_t StackVerify(Stack_t* stack)
     {
         return NULL_DATA;
     }
+    if (Hash(stack->data) != stack->hash)
+    {
+        return HASH_CHANGED;
+    }
     if (stack->size > SIZE_LIMIT)
     {
         return SIZE_EXCEEDS_LIMIT;
@@ -304,11 +324,60 @@ StackErr_t StackVerify(Stack_t* stack)
     }
     if (stack->data[0] != CANARY_VALUE)
     {
-        return WENT_BEYOND_START;
+        return START_CANARY_RUINED;
     }
     if (stack->data[stack->capacity + 1] != CANARY_VALUE)
     {
-        return WENT_BEYOND_END;
+        return END_CANARY_RUINED;
     }
     return STACK_SUCCESS;
+}
+#endif
+
+StackErr_t StackCheckCanaries(Stack_t* stack)
+{
+    assert(stack != NULL);
+    assert(stack->data != NULL);
+
+    if (stack->data[0] != CANARY_VALUE)
+    {
+        fprintf(stderr, "Start canary has changed, stack is now ruined\n");
+        return START_CANARY_RUINED;
+    }
+    if (stack->data[stack->capacity + 1] != CANARY_VALUE)
+    {
+        fprintf(stderr, "End canary has changed, stack is now ruined\n");
+        return END_CANARY_RUINED;
+    }
+
+    return STACK_SUCCESS;
+}
+
+StackErr_t StackCheckHash(Stack_t* stack)
+{
+    assert(stack != NULL);
+    assert(stack->data != NULL);
+
+    if (stack->hash != Hash(stack->data))
+    {
+        fprintf(stderr, "Hash has changed, stack is now ruined\n");
+        return HASH_CHANGED;
+    }
+
+    return STACK_SUCCESS;
+}
+
+// djb2
+size_t Hash(item_t* data)
+{
+    char* str = (char*) data;
+    size_t hash = 5381;
+    char ch = 0;
+
+    while ((ch = *str++) != '\0')
+    {
+        hash = ((hash << 5) + hash) + ch;
+    }
+
+    return hash;
 }
