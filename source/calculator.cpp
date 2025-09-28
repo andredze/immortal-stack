@@ -59,7 +59,7 @@ int GetCommand(char* line, Command_t* command, int* value)
     assert(line != NULL);
     assert(command != NULL);
 
-    char operation[MAX_COMMAND_LEN] = {};
+    char operation[CALC_MAX_COMMAND_LEN] = {};
 
     int arg_count = sscanf(line, "%s %d", operation, value);
     if (arg_count < 1 || arg_count > 2)
@@ -151,7 +151,7 @@ int RunCommand(Stack_t* calc_stack, Command_t command,
             int result = 0;
             StackErr_t pop_return = StackPop(calc_stack, &result);
 
-            if (pop_return == SIZE_IS_ZERO)
+            if (pop_return == STACK_SIZE_IS_ZERO)
             {
                 break;
             }

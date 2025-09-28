@@ -19,7 +19,7 @@
     #define DPRINTF(...) ;
 #endif
 
-const size_t SIZE_LIMIT = SIZE_MAX / 32 * 31;
+const size_t STACK_SIZE_LIMIT = SIZE_MAX / 32 * 31;
 
 const int CANARY_VALUE_INT = 0xABEBADED;
 const int POISON_INT = 0xDEAFBABA;
@@ -34,18 +34,18 @@ const char* const reason_end = "Stack didn't pass verifier at the end of functio
 
 typedef enum StackErr {
     STACK_SUCCESS = 0,
-    NULL_STACK = 1,
-    NULL_DATA = 2,
-    SIZE_EXCEEDS_LIMIT = 3,
-    CAPACITY_EXCEEDS_LIMIT = 4,
-    SIZE_EXCEEDS_CAPACITY = 5,
-    CALLOC_ERROR = 6,
-    REALLOC_ERROR = 7,
-    START_CANARY_RUINED = 8,
-    END_CANARY_RUINED = 9,
-    FILE_OPENNING_ERROR = 10,
-    SIZE_IS_ZERO = 11,
-    HASH_CHANGED = 12
+    STACK_IS_NULL = 1,
+    STACK_DATA_IS_NULL = 2,
+    STACK_SIZE_EXCEEDS_LIMIT = 3,
+    STACK_CAPACITY_EXCEEDS_LIMIT = 4,
+    STACK_SIZE_EXCEEDS_CAPACITY = 5,
+    STACK_CALLOC_ERROR = 6,
+    STACK_REALLOC_ERROR = 7,
+    STACK_START_CANARY_RUINED = 8,
+    STACK_END_CANARY_RUINED = 9,
+    STACK_FILE_OPENNING_ERROR = 10,
+    STACK_SIZE_IS_ZERO = 11,
+    STACK_HASH_CHANGED = 12
 } StackErr_t;
 
 typedef struct VarInfo {

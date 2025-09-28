@@ -6,8 +6,8 @@
 
 typedef enum MathErr {
     MATH_SUCCESS,
-    DIVISION_BY_ZERO,
-    STACK_ERROR,
+    MATH_DIVISION_BY_ZERO,
+    MATH_STACK_ERROR,
 } MathErr_t;
 
 typedef struct CalcData {

@@ -26,11 +26,11 @@ int main()
     for (int i = 0; i < 1; i++)
     {
         if ((pop_return = StackPop(&stack, &poped_item)) != STACK_SUCCESS &&
-             pop_return != SIZE_IS_ZERO)
+             pop_return != STACK_SIZE_IS_ZERO)
         {
             return EXIT_FAILURE;
         }
-        else if (pop_return != SIZE_IS_ZERO)
+        else if (pop_return != STACK_SIZE_IS_ZERO)
         {
             printf("poped_item = " SPEC "\n", poped_item);
         }

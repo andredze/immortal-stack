@@ -12,11 +12,11 @@ MathErr_t ApplyMathOperation(Stack_t* stack,
 
     if (StackPop(stack, &calc_data.number1) != STACK_SUCCESS)
     {
-        return STACK_ERROR;
+        return MATH_STACK_ERROR;
     }
     if (StackPop(stack, &calc_data.number2) != STACK_SUCCESS)
     {
-        return STACK_ERROR;
+        return MATH_STACK_ERROR;
     }
 
     MathErr_t error = MATH_SUCCESS;
@@ -26,7 +26,7 @@ MathErr_t ApplyMathOperation(Stack_t* stack,
     }
     if (StackPush(stack, calc_data.result) != STACK_SUCCESS)
     {
-        return STACK_ERROR;
+        return MATH_STACK_ERROR;
     }
 
     return MATH_SUCCESS;
@@ -70,7 +70,7 @@ MathErr_t Div(CalcData_t* calc_data)
     if (calc_data->number2 == 0)
     {
         printf("Can not divide by zero\n");
-        return DIVISION_BY_ZERO;
+        return MATH_DIVISION_BY_ZERO;
     }
     calc_data->result = calc_data->number1 / calc_data->number2;
 
@@ -83,7 +83,7 @@ MathErr_t Out(Stack_t* calc_stack)
 
     if (StackPop(calc_stack, &answer) != STACK_SUCCESS)
     {
-        return STACK_ERROR;
+        return MATH_STACK_ERROR;
     }
     printf("ANSWER = %d", answer);
 

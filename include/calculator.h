@@ -5,7 +5,7 @@
 #include "input.h"
 #include "stack.h"
 
-const int MAX_COMMAND_LEN = 200;
+const int CALC_MAX_COMMAND_LEN = 200;
 const size_t CALC_MIN_STACK_CAPACITY = 32;
 
 typedef enum CalculatorErr {

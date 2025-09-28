@@ -13,7 +13,7 @@
 #else
 #define STACK_OK(stack, reason) if (StackCheckHash(stack) != STACK_SUCCESS) \
                                 { \
-                                    return HASH_CHANGED; \
+                                    return STACK_HASH_CHANGED; \
                                 }
 #endif
 
@@ -22,20 +22,20 @@ StackErr_t StackCtor(Stack_t* stack, size_t capacity)
     if (stack == NULL)
     {
         DPRINTF("<Stack is null pointer>");
-        return NULL_STACK;
+        return STACK_IS_NULL;
     }
     stack->capacity = capacity;
 
-    if (stack->capacity > SIZE_LIMIT)
+    if (stack->capacity > STACK_SIZE_LIMIT)
     {
-        return CAPACITY_EXCEEDS_LIMIT;
+        return STACK_CAPACITY_EXCEEDS_LIMIT;
     }
 
     item_t* data = (item_t*) calloc(capacity + 2, sizeof(item_t));
     if (data == NULL)
     {
         DPRINTF("Memory allocation failed");
-        return CALLOC_ERROR;
+        return STACK_CALLOC_ERROR;
     }
     data[0] = CANARY_VALUE;
     data[capacity + 1] = CANARY_VALUE;
@@ -66,7 +66,7 @@ StackErr_t StackRealloc(Stack_t* stack)
     if (data == NULL)
     {
         DPRINTF("Memory reallocation failed");
-        return REALLOC_ERROR;
+        return STACK_REALLOC_ERROR;
     }
 
     data[0] = CANARY_VALUE;
@@ -91,7 +91,7 @@ StackErr_t StackPush(Stack_t* stack, item_t item)
     {
         if (StackRealloc(stack) != STACK_SUCCESS)
         {
-            return REALLOC_ERROR;
+            return STACK_REALLOC_ERROR;
         }
     }
     stack->data[1 + stack->size++] = item;
@@ -111,7 +111,7 @@ StackErr_t StackPop(Stack_t* stack, item_t* item)
     if (stack->size == 0)
     {
         DPRINTF("<Pop is impossible with zero size>\n");
-        return SIZE_IS_ZERO;
+        return STACK_SIZE_IS_ZERO;
     }
     *item = stack->data[--stack->size + 1];
     stack->data[stack->size + 1] = POISON;
@@ -166,40 +166,40 @@ int StackErrToStr(StackErr_t error, const char** line)
         case STACK_SUCCESS:
             *line = "No errors occurred";
             break;
-        case NULL_STACK:
+        case STACK_IS_NULL:
             *line = "Pointer to the stack structure is NULL";
             break;
-        case NULL_DATA:
+        case STACK_DATA_IS_NULL:
             *line = "Pointer to the stack data is NULL";
             break;
-        case SIZE_EXCEEDS_LIMIT:
+        case STACK_SIZE_EXCEEDS_LIMIT:
             *line = "Size exceeded limit (possibly set to the negative value)";
             break;
-        case CAPACITY_EXCEEDS_LIMIT:
+        case STACK_CAPACITY_EXCEEDS_LIMIT:
             *line = "Capacity exceeded limit (possibly set to the negative value)";
             break;
-        case SIZE_EXCEEDS_CAPACITY:
+        case STACK_SIZE_EXCEEDS_CAPACITY:
             *line = "Size exceeded capacity";
             break;
-        case CALLOC_ERROR:
+        case STACK_CALLOC_ERROR:
             *line = "Memory allocation with calloc failed";
             break;
-        case REALLOC_ERROR:
+        case STACK_REALLOC_ERROR:
             *line = "Memory reallocation failed";
             break;
-        case START_CANARY_RUINED:
+        case STACK_START_CANARY_RUINED:
             *line = "Start boundary value was changed";
             break;
-        case END_CANARY_RUINED:
+        case STACK_END_CANARY_RUINED:
             *line = "End boundary value was changed";
             break;
-        case FILE_OPENNING_ERROR:
+        case STACK_FILE_OPENNING_ERROR:
             *line = "Opening the log file failed";
             break;
-        case SIZE_IS_ZERO:
+        case STACK_SIZE_IS_ZERO:
             *line = "Size equals zero";
             break;
-        case HASH_CHANGED:
+        case STACK_HASH_CHANGED:
             *line = "Hash changed it's value";
             break;
         default:
@@ -217,13 +217,13 @@ StackErr_t StackDump(Stack_t* stack, StackErr_t error,
     if (stream == NULL)
     {
         DPRINTF("Can not open stream: stack.log");
-        return FILE_OPENNING_ERROR;
+        return STACK_FILE_OPENNING_ERROR;
     }
 
     const char* error_str = NULL;
     StackErrToStr(error, &error_str);
 
-    if (error == NULL_STACK)
+    if (error == STACK_IS_NULL)
     {
         fprintf(stream, "%s\n", error_str);
         return STACK_SUCCESS;
@@ -246,7 +246,7 @@ StackErr_t StackDump(Stack_t* stack, StackErr_t error,
                     stack->capacity,
                     stack->data);
 
-    if (error == NULL_DATA)
+    if (error == STACK_DATA_IS_NULL)
     {
         fprintf(stream, "\t----------------"
                         "\t}"
@@ -259,15 +259,15 @@ StackErr_t StackDump(Stack_t* stack, StackErr_t error,
     item_t* data = stack->data;
 
     // if size/capacity is wrong, output only 16 first elements
-    if (error == SIZE_EXCEEDS_LIMIT)
+    if (error == STACK_SIZE_EXCEEDS_LIMIT)
     {
         size = 16;
     }
-    if (error == CAPACITY_EXCEEDS_LIMIT)
+    if (error == STACK_CAPACITY_EXCEEDS_LIMIT)
     {
         capacity = size;
     }
-    if (error == SIZE_EXCEEDS_CAPACITY)
+    if (error == STACK_SIZE_EXCEEDS_CAPACITY)
     {
         size = capacity - 1;
     }
@@ -300,35 +300,35 @@ StackErr_t StackVerify(Stack_t* stack)
 {
     if (stack == NULL)
     {
-        return NULL_STACK;
+        return STACK_IS_NULL;
     }
     if (stack->data == NULL)
     {
-        return NULL_DATA;
+        return STACK_DATA_IS_NULL;
     }
     if (Hash(stack->data) != stack->hash)
     {
-        return HASH_CHANGED;
+        return STACK_HASH_CHANGED;
     }
-    if (stack->size > SIZE_LIMIT)
+    if (stack->size > STACK_SIZE_LIMIT)
     {
-        return SIZE_EXCEEDS_LIMIT;
+        return STACK_SIZE_EXCEEDS_LIMIT;
     }
-    if (stack->capacity > SIZE_LIMIT)
+    if (stack->capacity > STACK_SIZE_LIMIT)
     {
-        return CAPACITY_EXCEEDS_LIMIT;
+        return STACK_CAPACITY_EXCEEDS_LIMIT;
     }
     if (stack->size > stack->capacity)
     {
-        return SIZE_EXCEEDS_CAPACITY;
+        return STACK_SIZE_EXCEEDS_CAPACITY;
     }
     if (stack->data[0] != CANARY_VALUE)
     {
-        return START_CANARY_RUINED;
+        return STACK_START_CANARY_RUINED;
     }
     if (stack->data[stack->capacity + 1] != CANARY_VALUE)
     {
-        return END_CANARY_RUINED;
+        return STACK_END_CANARY_RUINED;
     }
     return STACK_SUCCESS;
 }
@@ -342,12 +342,12 @@ StackErr_t StackCheckCanaries(Stack_t* stack)
     if (stack->data[0] != CANARY_VALUE)
     {
         fprintf(stderr, "Start canary has changed, stack is now ruined\n");
-        return START_CANARY_RUINED;
+        return STACK_START_CANARY_RUINED;
     }
     if (stack->data[stack->capacity + 1] != CANARY_VALUE)
     {
         fprintf(stderr, "End canary has changed, stack is now ruined\n");
-        return END_CANARY_RUINED;
+        return STACK_END_CANARY_RUINED;
     }
 
     return STACK_SUCCESS;
@@ -361,7 +361,7 @@ StackErr_t StackCheckHash(Stack_t* stack)
     if (stack->hash != Hash(stack->data))
     {
         fprintf(stderr, "Hash has changed, stack is now ruined\n");
-        return HASH_CHANGED;
+        return STACK_HASH_CHANGED;
     }
 
     return STACK_SUCCESS;
