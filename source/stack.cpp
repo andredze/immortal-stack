@@ -141,9 +141,9 @@ StackErr_t StackIsOk(Stack_t* stack,
                      int line,
                      const char* reason_of_calling)
 {
-    stack->VarInfo.file_name = file_name;
-    stack->VarInfo.function = function;
-    stack->VarInfo.line = line;
+    stack->var_info.file_name = file_name;
+    stack->var_info.function = function;
+    stack->var_info.line = line;
 
     StackErr_t error = STACK_SUCCESS;
     StackErr_t dump_return = STACK_SUCCESS;
@@ -237,11 +237,11 @@ StackErr_t StackDump(Stack_t* stack, StackErr_t error,
                     "\tcapacity = %zu;\n"
                     "\tdata [%p];\n\t{\n",
                     reason_of_calling,
-                    stack->VarInfo.function,
-                    stack->VarInfo.file_name,
-                    stack->VarInfo.line,
+                    stack->var_info.function,
+                    stack->var_info.file_name,
+                    stack->var_info.line,
                     error, error_str,
-                    stack->VarInfo.struct_name, stack,
+                    stack->var_info.struct_name, stack,
                     stack->size,
                     stack->capacity,
                     stack->data);

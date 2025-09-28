@@ -6,14 +6,15 @@
 #include "stack.h"
 
 const int MAX_COMMAND_LEN = 200;
+const size_t CALC_MIN_STACK_CAPACITY = 32;
 
 typedef enum CalculatorErr {
     CALC_SUCCESS,
-    ERROR_WITH_READING_FILE,
+    CALC_ERROR_WITH_READING_FILE,
     CALC_STACK_ERROR,
-    OUTPUT_FILE_OPENNING_ERROR,
-    UNKNOWN_CALC_COMMAND,
-    MATH_ERROR
+    CALC_OUTPUT_FILE_OPENNING_ERROR,
+    CALC_UNKNOWN_COMMAND,
+    CALC_MATH_ERROR
 } CalculatorErr_t;
 
 typedef enum Command {
@@ -26,11 +27,11 @@ typedef enum Command {
     HLT
 } Command_t;
 
-CalculatorErr_t RunCalculator(Context_t* CommandsData);
+CalculatorErr_t RunCalculator(Context_t* commands_data);
 
-int get_command(char* line, Command_t* command, int* value);
+int GetCommand(char* line, Command_t* command, int* value);
 
-int run_command(Stack_t* CalcStack, Command_t command,
+int RunCommand(Stack_t* calc_stack, Command_t command,
                 int value, FILE* output_stream);
 
 #endif /* CALCULATOR_H */

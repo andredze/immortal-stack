@@ -1,60 +1,60 @@
 #include "calculator.h"
 
-CalculatorErr_t RunCalculator(Context_t* CommandsData)
+CalculatorErr_t RunCalculator(Context_t* commands_data)
 {
-    assert(CommandsData != NULL);
+    assert(commands_data != NULL);
 
-    if (read_and_parse_file(CommandsData))
+    if (ReadAndParseFile(commands_data))
     {
-        return ERROR_WITH_READING_FILE;
+        return CALC_ERROR_WITH_READING_FILE;
     }
-    DPRINTF("lines_count = %d\n", CommandsData->BufferData.lines_count);
+    DPRINTF("lines_count = %d\n", commands_data->buffer_data.lines_count);
 
-    INIT_STACK(CalcStack);
+    INIT_STACK(calc_stack);
 
-    if (StackCtor(&CalcStack, 32) != STACK_SUCCESS)
+    if (StackCtor(&calc_stack, CALC_MIN_STACK_CAPACITY) != STACK_SUCCESS)
     {
         return CALC_STACK_ERROR;
     }
 
-    int lines_count = CommandsData->PtrDataParams.lines_count;
-    char** ptrdata = CommandsData->PtrDataParams.ptrdata;
+    int lines_count = commands_data->ptrdata_params.lines_count;
+    char** ptrdata = commands_data->ptrdata_params.ptrdata;
 
     Command_t command = HLT;
     int value = 0;
 
-    if (open_file(&CommandsData->OutputFileInfo, "w"))
+    if (OpenFile(&commands_data->output_file_info, "w"))
     {
-        return OUTPUT_FILE_OPENNING_ERROR;
+        return CALC_OUTPUT_FILE_OPENNING_ERROR;
     }
 
     for (int i = 0; i < lines_count; i++)
     {
         DPRINTF("\nEntering %d iteration of ptrdata for\n", i);
-        if (get_command(ptrdata[i], &command, &value))
+        if (GetCommand(ptrdata[i], &command, &value))
         {
-            return UNKNOWN_CALC_COMMAND;
+            return CALC_UNKNOWN_COMMAND;
         }
         DPRINTF("Command = %d\n", command);
         if (command == HLT)
         {
             break;
         }
-        if (run_command(&CalcStack, command, value,
-                        CommandsData->OutputFileInfo.stream))
+        if (RunCommand(&calc_stack, command, value,
+                        commands_data->output_file_info.stream))
         {
-            return MATH_ERROR;
+            return CALC_MATH_ERROR;
         }
     }
 
-    free(CommandsData->BufferData.buffer);
-    free(CommandsData->PtrDataParams.ptrdata);
+    free(commands_data->buffer_data.buffer);
+    free(commands_data->ptrdata_params.ptrdata);
     printf("\n<End of the calculator>");
 
     return CALC_SUCCESS;
 }
 
-int get_command(char* line, Command_t* command, int* value)
+int GetCommand(char* line, Command_t* command, int* value)
 {
     assert(line != NULL);
     assert(command != NULL);
@@ -105,43 +105,43 @@ int get_command(char* line, Command_t* command, int* value)
     return 0;
 }
 
-int run_command(Stack_t* CalcStack, Command_t command,
+int RunCommand(Stack_t* calc_stack, Command_t command,
                 int value, FILE* output_stream)
 {
-    assert(CalcStack != NULL);
+    assert(calc_stack != NULL);
 
     switch (command)
     {
         case PUSH: {
-            if (StackPush(CalcStack, value) != STACK_SUCCESS)
+            if (StackPush(calc_stack, value) != STACK_SUCCESS)
             {
                 return 1;
             }
             break;
         }
         case ADD: {
-            if (ApplyMathOperation(CalcStack, Add) != 0)
+            if (ApplyMathOperation(calc_stack, Add) != 0)
             {
                 return 1;
             }
             break;
         }
         case SUB: {
-            if (ApplyMathOperation(CalcStack, Sub) != 0)
+            if (ApplyMathOperation(calc_stack, Sub) != 0)
             {
                 return 1;
             }
             break;
         }
         case MUL: {
-            if (ApplyMathOperation(CalcStack, Mul) != 0)
+            if (ApplyMathOperation(calc_stack, Mul) != 0)
             {
                 return 1;
             }
             break;
         }
         case DIV: {
-            if (ApplyMathOperation(CalcStack, Div) != 0)
+            if (ApplyMathOperation(calc_stack, Div) != 0)
             {
                 return 1;
             }
@@ -149,7 +149,7 @@ int run_command(Stack_t* CalcStack, Command_t command,
         }
         case OUT: {
             int result = 0;
-            StackErr_t pop_return = StackPop(CalcStack, &result);
+            StackErr_t pop_return = StackPop(calc_stack, &result);
 
             if (pop_return == SIZE_IS_ZERO)
             {

@@ -8,7 +8,7 @@
 #include <assert.h>
 
 #ifdef DEBUG
-    #define INIT_STACK(name) Stack_t name = {.VarInfo = {#name, __FILE__, __func__, __LINE__}}
+    #define INIT_STACK(name) Stack_t name = {.var_info = {#name, __FILE__, __func__, __LINE__}}
 #else
     #define INIT_STACK(name) Stack_t name = {}
 #endif
@@ -61,7 +61,7 @@ typedef struct Stack {
     size_t capacity;
     size_t hash;
 #ifdef DEBUG
-    VarInfo_t VarInfo;
+    VarInfo_t var_info;
 #endif
 } Stack_t;
 

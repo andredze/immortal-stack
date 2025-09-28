@@ -31,32 +31,32 @@ typedef struct FileInfo {
 } FileInfo_t;
 
 typedef struct Context {
-    FileInfo_t InputFileInfo;
-    BufferData_t BufferData;
-    PtrDataParams_t PtrDataParams;
-    FileInfo_t OutputFileInfo;
+    FileInfo_t input_file_info;
+    BufferData_t buffer_data;
+    PtrDataParams_t ptrdata_params;
+    FileInfo_t output_file_info;
 } Context_t;
 
-int read_and_parse_file(Context_t* Context);
+int ReadAndParseFile(Context_t* context);
 
-int open_file(FileInfo_t* FileInfo, const char* mode);
+int OpenFile(FileInfo_t* file_info, const char* mode);
 
-int count_size(Context_t* Context);
+int CountSize(Context_t* context);
 
-int read_text(Context_t* Context);
+int ReadText(Context_t* context);
 
-int allocate_buffer(Context_t* Context);
+int AllocateBuffer(Context_t* context);
 
-int fill_buffer(Context_t* Context);
+int FillBuffer(Context_t* context);
 
-int parse_text(Context_t* Context);
+int ParseText(Context_t* context);
 
-int count_lines(Context_t* Context);
+int CountLines(Context_t* context);
 
-int allocate_ptrdata(Context_t* Context);
+int AllocatePtrdata(Context_t* context);
 
-int fill_ptrdata(Context_t* Context);
+int FillPtrdata(Context_t* context);
 
-void add_null_terminators(char* ptr);
+void AddNullTerminators(char* ptr);
 
 #endif /* INPUT_H */

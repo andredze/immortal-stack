@@ -51,10 +51,11 @@ int main()
     StackDtor(&stack);
     DPRINTF("\n<Programm ran without errors>\n");
 
-    Context_t CommandsData = {.InputFileInfo =  {.filepath = "commands.txt"},
-                              .OutputFileInfo = {.filepath = "answers.txt"}};
+    // calculator
+    Context_t commands_data = {.input_file_info =  {.filepath = "commands.txt"},
+                              .output_file_info = {.filepath = "answers.txt"}};
 
-    if (RunCalculator(&CommandsData) != CALC_SUCCESS)
+    if (RunCalculator(&commands_data) != CALC_SUCCESS)
     {
         return EXIT_FAILURE;
     }
