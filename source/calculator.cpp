@@ -30,7 +30,7 @@ CalcErr_t ExecuteCalculatorProgramm(Context_t* commands_data)
 
 CalcErr_t ExecuteCommands(Context_t* commands_data)
 {
-    Command_t command = COMM_HLT;
+    Command_t command = CMD_HLT;
     int value = 0;
 
     INIT_STACK(calc_stack);
@@ -51,7 +51,7 @@ CalcErr_t ExecuteCommands(Context_t* commands_data)
         }
         DPRINTF("Command = %d\n", command);
 
-        if (command == COMM_HLT)
+        if (command == CMD_HLT)
         {
             break;
         }
@@ -80,13 +80,13 @@ int GetCommand(char* line, Command_t* command, int* value)
         return 1;
     }
 
-    CommCase_t comm_cases[] = {{"PUSH", COMM_PUSH},
-                               {"ADD", COMM_ADD},
-                               {"SUB", COMM_SUB},
-                               {"MUL", COMM_MUL},
-                               {"DIV", COMM_DIV},
-                               {"OUT", COMM_OUT},
-                               {"HLT", COMM_HLT}};
+    CommCase_t comm_cases[] = {{"PUSH", CMD_PUSH},
+                               {"ADD", CMD_ADD},
+                               {"SUB", CMD_SUB},
+                               {"MUL", CMD_MUL},
+                               {"DIV", CMD_DIV},
+                               {"OUT", CMD_OUT},
+                               {"HLT", CMD_HLT}};
 
     size_t comm_cases_size = sizeof(comm_cases) / sizeof(comm_cases[0]);
 
@@ -110,19 +110,19 @@ int RunCommand(Stack_t* calc_stack, Command_t command,
 
     switch (command)
     {
-        case COMM_PUSH:
+        case CMD_PUSH:
             return StackPush(calc_stack, value) == STACK_SUCCESS ? 0 : 1;
-        case COMM_ADD:
+        case CMD_ADD:
             return ApplyMathOperation(calc_stack, Add) == MATH_SUCCESS ? 0 : 1;
-        case COMM_SUB:
+        case CMD_SUB:
             return ApplyMathOperation(calc_stack, Sub) == MATH_SUCCESS ? 0 : 1;
-        case COMM_MUL:
+        case CMD_MUL:
             return ApplyMathOperation(calc_stack, Mul) == MATH_SUCCESS ? 0 : 1;
-        case COMM_DIV:
+        case CMD_DIV:
             return ApplyMathOperation(calc_stack, Div) == MATH_SUCCESS ? 0 : 1;
-        case COMM_OUT:
+        case CMD_OUT:
             return HandleOut(calc_stack, output_stream);
-        case COMM_HLT:
+        case CMD_HLT:
             return 1;
         default:
             return 1;

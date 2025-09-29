@@ -2,14 +2,14 @@
 
 int RunErrorTests()
 {
-    CreateStackError_t functions_creating_err[] = {CreateStackIsNullError,
-                                                   CreateStackDataIsNullError,
-                                                   CreateStackSizeExceedsLimitError,
-                                                   CreateStackCapacityExceedsLimitError,
-                                                   CreateStackSizeExceedsCapacityError,
-                                                   CreateStartCanaryIsRuinedError,
-                                                   CreateEndCanaryIsRuinedError,
-                                                   CreateHashIsRuinedError};
+    SimulateStackError_t functions_creating_err[] = {SimulateStackIsNullError,
+                                                   SimulateStackDataIsNullError,
+                                                   SimulateStackSizeExceedsLimitError,
+                                                   SimulateStackCapacityExceedsLimitError,
+                                                   SimulateStackSizeExceedsCapacityError,
+                                                   SimulateStartCanaryIsRuinedError,
+                                                   SimulateEndCanaryIsRuinedError,
+                                                   SimulateHashIsRuinedError};
     int return_value = 0;
     Stack_t stack_for_errors = {};
     int error_code = 0;
@@ -84,37 +84,40 @@ int RunRightUsageExample()
 
     INIT_STACK(stack1);
 
-    if (StackCtor(&stack1, 4) != STACK_SUCCESS)
+    if (StackCtor(&stack1, 16) != STACK_SUCCESS)
     {
         return EXIT_FAILURE;
     }
     StackPrint(&stack1);
 
-    if (StackPush(&stack1, 40) != STACK_SUCCESS)
-    {
-        return EXIT_FAILURE;
-    }
-    StackPrint(&stack1);
+    int values[] = {10, 20, 30, 40, 50, 60, 70, 80, 90, 100};
+    size_t values_len = sizeof(values) / sizeof(values[0]);
 
-    if (StackPush(&stack1, 50) != STACK_SUCCESS)
+    for (size_t i = 0; i < values_len / 2; i++)
     {
-        return EXIT_FAILURE;
+        if (StackPush(&stack1, values[i]) != STACK_SUCCESS)
+        {
+            return EXIT_FAILURE;
+        }
+        StackPrint(&stack1);
     }
-    StackPrint(&stack1);
-
-    if (StackPush(&stack1, 32) != STACK_SUCCESS)
-    {
-        return EXIT_FAILURE;
-    }
-    StackPrint(&stack1);
 
     item_t poped_item = 0;
     StackErr_t pop_return = STACK_SUCCESS;
 
-    for (int i = 0; i < 4; i++)
+    for (size_t i = 0; i < values_len / 2 + 1; i++)
     {
         if ((pop_return = StackPop(&stack1, &poped_item)) != STACK_SUCCESS &&
              pop_return != STACK_SIZE_IS_ZERO)
+        {
+            return EXIT_FAILURE;
+        }
+        StackPrint(&stack1);
+    }
+
+    for (size_t i = values_len / 2 + 1; i < values_len; i++)
+    {
+        if (StackPush(&stack1, values[i]) != STACK_SUCCESS)
         {
             return EXIT_FAILURE;
         }
@@ -152,38 +155,38 @@ Stack_t RunStartOfExampleForErrors()
     return stack1;
 }
 
-int CreateStackIsNullError(Stack_t* stack)
+int SimulateStackIsNullError(Stack_t* stack)
 {
     stack = NULL;
     return RunExampleOfPush(stack);
 }
 
-int CreateStackDataIsNullError(Stack_t* stack)
+int SimulateStackDataIsNullError(Stack_t* stack)
 {
     stack->data = NULL;
     return RunExampleOfPop(stack);
 }
 
-int CreateStackSizeExceedsLimitError(Stack_t* stack)
+int SimulateStackSizeExceedsLimitError(Stack_t* stack)
 {
     stack->size = -1llu;
     return RunExampleOfPush(stack);
 }
 
-int CreateStackCapacityExceedsLimitError(Stack_t* stack)
+int SimulateStackCapacityExceedsLimitError(Stack_t* stack)
 {
     stack->capacity = 10;
     stack->capacity = stack->capacity - 20;
     return RunExampleOfPush(stack);
 }
 
-int CreateStackSizeExceedsCapacityError(Stack_t* stack)
+int SimulateStackSizeExceedsCapacityError(Stack_t* stack)
 {
     stack->size = stack->capacity + 20;
     return RunExampleOfPush(stack);
 }
 
-int CreateStartCanaryIsRuinedError(Stack_t* stack)
+int SimulateStartCanaryIsRuinedError(Stack_t* stack)
 {
     // zeroing some array
     char* array = (char*) (stack->data) - 10;
@@ -196,7 +199,7 @@ int CreateStartCanaryIsRuinedError(Stack_t* stack)
     return RunExampleOfPop(stack);
 }
 
-int CreateEndCanaryIsRuinedError(Stack_t* stack)
+int SimulateEndCanaryIsRuinedError(Stack_t* stack)
 {
     // filling some array in reversed order
     char* array = (char*) (stack->data + stack->capacity + 2) - 1;
@@ -209,7 +212,7 @@ int CreateEndCanaryIsRuinedError(Stack_t* stack)
     return RunExampleOfPush(stack);
 }
 
-int CreateHashIsRuinedError(Stack_t* stack)
+int SimulateHashIsRuinedError(Stack_t* stack)
 {
     int* array = (int*) (stack->data);
     *(array + 2) = 100000000;

@@ -37,7 +37,7 @@ StackErr_t StackCtor(Stack_t* stack, size_t capacity)
     return STACK_SUCCESS;
 }
 
-StackErr_t StackRealloc(Stack_t* stack)
+StackErr_t StackReallocUp(Stack_t* stack)
 {
     STACK_OK(stack, reason_start);
 
@@ -48,7 +48,7 @@ StackErr_t StackRealloc(Stack_t* stack)
                                     (stack->capacity + 2) * sizeof(item_t));
     if (stack->data == NULL)
     {
-        DPRINTF("Memory reallocation failed");
+        DPRINTF("Memory reallocation up failed");
         return STACK_REALLOC_ERROR;
     }
 
@@ -66,16 +66,36 @@ StackErr_t StackRealloc(Stack_t* stack)
     return STACK_SUCCESS;
 }
 
+StackErr_t StackReallocDown(Stack_t* stack)
+{
+    STACK_OK(stack, reason_start);
+
+    stack->capacity = stack->capacity / 2;
+
+    stack->data = (item_t*) realloc(stack->data,
+                                    (stack->capacity + 2) * sizeof(item_t));
+    if (stack->data == NULL)
+    {
+        DPRINTF("Memory reallocation down failed");
+        return STACK_REALLOC_ERROR;
+    }
+
+    stack->data[stack->capacity + 1] = CANARY_VALUE;
+
+    stack->hash = StackHash(stack);
+    STACK_OK(stack, reason_end);
+
+    return STACK_SUCCESS;
+}
+
 StackErr_t StackPush(Stack_t* stack, item_t item)
 {
     STACK_OK(stack, reason_start);
 
     if (stack->size == stack->capacity)
     {
-        StackErr_t error = STACK_SUCCESS;
-        if ((error = StackRealloc(stack)) != STACK_SUCCESS)
+        if (StackReallocUp(stack) != STACK_SUCCESS)
         {
-            DPRINTF("Realloc failed err: %d\n", error);
             return STACK_REALLOC_ERROR;
         }
     }
@@ -102,6 +122,15 @@ StackErr_t StackPop(Stack_t* stack, item_t* item)
     stack->data[stack->size + 1] = POISON;
 
     stack->hash = StackHash(stack);
+
+    if (stack->size < stack->capacity / 4)
+    {
+        if (StackReallocDown(stack) != STACK_SUCCESS)
+        {
+            return STACK_REALLOC_ERROR;
+        }
+    }
+
     STACK_OK(stack, reason_end);
 
     return STACK_SUCCESS;
@@ -396,12 +425,23 @@ StackErr_t StackPrint(Stack_t* stack)
 {
     STACK_OK(stack, reason_start);
 
-    printf("[");
-    for (size_t i = 0; i < stack->capacity + 1; i++)
+    if (stack->data[0] == CANARY_VALUE)
+        printf("[cnry, ");
+    else
+        printf("[%d, ", stack->data[0]);
+
+    for (size_t i = 1; i < stack->capacity + 1; i++)
     {
-        printf("%d, ", stack->data[i]);
+        if (stack->data[i] == POISON)
+            printf("*, ");
+        else
+            printf("%d, ", stack->data[i]);
     }
-    printf("%d]\n", stack->data[stack->capacity + 1]);
+
+    if (stack->data[stack->capacity + 1] == CANARY_VALUE)
+        printf("cnry]\n");
+    else
+        printf("%d]\n", stack->data[stack->capacity + 1]);
 
     return STACK_SUCCESS;
 }

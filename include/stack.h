@@ -84,7 +84,9 @@ typedef struct Stack {
 
 StackErr_t StackCtor(Stack_t* stack, size_t capacity);
 
-StackErr_t StackRealloc(Stack_t* stack);
+StackErr_t StackReallocUp(Stack_t* stack);
+
+StackErr_t StackReallocDown(Stack_t* stack);
 
 StackErr_t StackPush(Stack_t* stack, item_t item);
 

@@ -1,26 +1,26 @@
 reason: Stack didn't pass verifier at the start of function
-from StackPush at source/stack.cpp:71
+from StackReallocDown at source/stack.cpp:71
 ERROR 8: Hash changed it's value
-stack: stack1 [000000F194FFFB00]
+stack: stack1 [00000034A71FF750]
 {
-	size = 13;
+	size = 2;
 	capacity = 16;
-	data [000001FA2C7AAA30];
+	data [00000148A05DAC60];
 	{
 		 [0] = -1410617875 (CANARY);
-		*[1] = 10;
-		*[2] = 100000000;
-		*[3] = 30;
-		*[4] = 40;
-		*[5] = 50;
-		*[6] = 60;
-		*[7] = 70;
-		*[8] = 80;
-		*[9] = 90;
-		*[10] = 89;
-		*[11] = 79;
-		*[12] = 69;
-		*[13] = 59;
+		*[1] = 40;
+		*[2] = 50;
+		 [3] = -558908742 (POISON);
+		 [4] = -558908742 (POISON);
+		 [5] = -558908742 (POISON);
+		 [6] = -558908742 (POISON);
+		 [7] = -558908742 (POISON);
+		 [8] = -558908742 (POISON);
+		 [9] = -558908742 (POISON);
+		 [10] = -558908742 (POISON);
+		 [11] = -558908742 (POISON);
+		 [12] = -558908742 (POISON);
+		 [13] = -558908742 (POISON);
 		 [14] = -558908742 (POISON);
 		 [15] = -558908742 (POISON);
 		 [16] = -558908742 (POISON);

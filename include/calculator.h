@@ -18,13 +18,13 @@ typedef enum CalcErr {
 } CalcErr_t;
 
 typedef enum Command {
-    COMM_PUSH,
-    COMM_ADD,
-    COMM_SUB,
-    COMM_MUL,
-    COMM_DIV,
-    COMM_OUT,
-    COMM_HLT
+    CMD_PUSH,
+    CMD_ADD,
+    CMD_SUB,
+    CMD_MUL,
+    CMD_DIV,
+    CMD_OUT,
+    CMD_HLT
 } Command_t;
 
 typedef struct CommCase {
