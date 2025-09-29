@@ -5,7 +5,11 @@
 #include "maths.h"
 #include "calculator.h"
 
+typedef int (*CreateStackError_t) (Stack_t*);
+
 const int STACK_PUSH_EXAMPLE_VALUE = 50;
+
+int RunErrorTests();
 
 int RunCalculatorProgrammExample();
 

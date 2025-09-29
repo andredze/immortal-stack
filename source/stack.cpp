@@ -207,6 +207,8 @@ StackErr_t StackDump(Stack_t* stack, StackErr_t error,
 {
     assert(reason_of_calling != NULL);
 
+    DPRINTF("Dumping...\n");
+
     FILE* stream = fopen("stack.log", "w");
     if (stream == NULL)
     {
@@ -219,7 +221,9 @@ StackErr_t StackDump(Stack_t* stack, StackErr_t error,
 
     if (error == STACK_IS_NULL)
     {
+        DPRINTF("Stack is null activated\n");
         fprintf(stream, "%s\n", error_str);
+        fclose(stream);
         return STACK_SUCCESS;
     }
 
@@ -242,9 +246,11 @@ StackErr_t StackDump(Stack_t* stack, StackErr_t error,
 
     if (error == STACK_DATA_IS_NULL)
     {
+        DPRINTF("Stack.data is null activated\n");
         fprintf(stream, "\t\t----------------\n"
                         "\t}\n"
                         "}\n");
+        fclose(stream);
         return STACK_SUCCESS;
     }
 
@@ -288,8 +294,8 @@ StackErr_t StackDump(Stack_t* stack, StackErr_t error,
     }
     fprintf(stream, "\t}\n"
                     "}");
-    fclose(stream);
 
+    fclose(stream);
     return STACK_SUCCESS;
 }
 

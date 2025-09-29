@@ -1,15 +1,15 @@
 reason: Stack didn't pass verifier at the start of function
-from StackPop at source/stack.cpp:94
-ERROR 6: Start boundary value was changed
-stack: stack1 [000000BE3C1FF970]
+from StackPush at source/stack.cpp:71
+ERROR 8: Hash changed it's value
+stack: stack1 [000000F194FFFB00]
 {
 	size = 13;
 	capacity = 16;
-	data [000002241C9AA620];
+	data [000001FA2C7AAA30];
 	{
-		 [0] = 0 (CANARY);
-		*[1] = 0;
-		*[2] = 0;
+		 [0] = -1410617875 (CANARY);
+		*[1] = 10;
+		*[2] = 100000000;
 		*[3] = 30;
 		*[4] = 40;
 		*[5] = 50;

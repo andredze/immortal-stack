@@ -1,5 +1,48 @@
 #include "examples.h"
 
+int RunErrorTests()
+{
+    CreateStackError_t functions_creating_err[] = {CreateStackIsNullError,
+                                                   CreateStackDataIsNullError,
+                                                   CreateStackSizeExceedsLimitError,
+                                                   CreateStackCapacityExceedsLimitError,
+                                                   CreateStackSizeExceedsCapacityError,
+                                                   CreateStartCanaryIsRuinedError,
+                                                   CreateEndCanaryIsRuinedError,
+                                                   CreateHashIsRuinedError};
+    int return_value = 0;
+    Stack_t stack_for_errors = {};
+    int error_code = 0;
+
+    // error code from 0 to 7, other to exit
+    while (1)
+    {
+        printf("-----<TEST STARTED>-----\n");
+        printf("Enter the error_code to test: ");
+        if (scanf("%d", &error_code) != 1)
+        {
+            break;
+        }
+        if (error_code < 0 || error_code > 7)
+        {
+            break;
+        }
+        stack_for_errors = RunStartOfExampleForErrors();
+        return_value = functions_creating_err[error_code](&stack_for_errors);
+        printf("return_value = %d\n", return_value);
+
+        // не работает на ошибке 5, т.к испорчена управл. структура
+        if (error_code != 5)
+        {
+            printf("Destroying stack...\n");
+            StackDtor(&stack_for_errors);
+        }
+        printf("-----<TEST ENDED>-----\n\n");
+    }
+
+    return 0;
+}
+
 int RunCalculatorProgrammExample()
 {
     Context_t commands_data = {.input_file_info =  {.filepath = "commands.txt"},
