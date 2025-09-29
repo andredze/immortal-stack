@@ -1,64 +1,24 @@
 #include "stack.h"
 #include "maths.h"
 #include "calculator.h"
+#include "examples.h"
 
 int main()
 {
-    INIT_STACK(stack);
+    RunRightUsageExample();
+    // RunCalculatorProgrammExample();
 
-    if (StackCtor(&stack, 4) != STACK_SUCCESS)
-    {
-        return EXIT_FAILURE;
-    }
+    Stack_t stack_for_errors = RunStartOfExampleForErrors();
 
-    if (StackPush(&stack, 40) != STACK_SUCCESS)
-    {
-        return EXIT_FAILURE;
-    }
-    if (StackPush(&stack, 50) != STACK_SUCCESS)
-    {
-        return EXIT_FAILURE;
-    }
-
-    item_t poped_item = 0;
-    StackErr_t pop_return = STACK_SUCCESS;
-
-    for (int i = 0; i < 1; i++)
-    {
-        if ((pop_return = StackPop(&stack, &poped_item)) != STACK_SUCCESS &&
-             pop_return != STACK_SIZE_IS_ZERO)
-        {
-            return EXIT_FAILURE;
-        }
-        else if (pop_return != STACK_SIZE_IS_ZERO)
-        {
-            printf("poped_item = " SPEC "\n", poped_item);
-        }
-    }
-
-    // stack.data[1] = 10;
-    if (StackPush(&stack, 50) != STACK_SUCCESS)
-    {
-        return EXIT_FAILURE;
-    }
-
-    // stack.size = 100;
-    if (StackPush(&stack, 50) != STACK_SUCCESS)
-    {
-        return EXIT_FAILURE;
-    }
-
-    StackDtor(&stack);
-    DPRINTF("\n<Programm ran without errors>\n");
-
-    // calculator
-    Context_t commands_data = {.input_file_info =  {.filepath = "commands.txt"},
-                              .output_file_info = {.filepath = "answers.txt"}};
-
-    if (RunCalculator(&commands_data) != CALC_SUCCESS)
-    {
-        return EXIT_FAILURE;
-    }
+    // CreateStackIsNullError(&stack_for_errors);
+    // CreateStackDataIsNullError(&stack_for_errors);
+    // CreateStackSizeExceedsLimitError(&stack_for_errors);
+    // CreateStackCapacityExceedsLimitError(&stack_for_errors);
+    // CreateStackSizeExceedsCapacityError(&stack_for_errors);
+    // CreateStartCanaryIsRuinedError(&stack_for_errors);
+    // CreateEndCanaryIsRuinedError(&stack_for_errors);
+    // CreateHashIsRuinedError(&stack_for_errors);
+    StackDtor(&stack_for_errors);
 
     return EXIT_SUCCESS;
 }

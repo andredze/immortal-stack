@@ -1,6 +1,6 @@
 #include "calculator.h"
 
-CalculatorErr_t RunCalculator(Context_t* commands_data)
+CalcErr_t ExecuteCalculatorProgramm(Context_t* commands_data)
 {
     assert(commands_data != NULL);
 
@@ -10,6 +10,29 @@ CalculatorErr_t RunCalculator(Context_t* commands_data)
     }
     DPRINTF("lines_count = %d\n", commands_data->buffer_data.lines_count);
 
+    if (OpenFile(&commands_data->output_file_info, "w"))
+    {
+        return CALC_OUTPUT_FILE_OPENNING_ERROR;
+    }
+
+    CalcErr_t error = CALC_SUCCESS;
+    if ((error = ExecuteCommands(commands_data)) != CALC_SUCCESS)
+    {
+        return error;
+    }
+
+    free(commands_data->buffer_data.buffer);
+    free(commands_data->ptrdata_params.ptrdata);
+    printf("\n<End of the calculator>");
+
+    return CALC_SUCCESS;
+}
+
+CalcErr_t ExecuteCommands(Context_t* commands_data)
+{
+    Command_t command = COMM_HLT;
+    int value = 0;
+
     INIT_STACK(calc_stack);
 
     if (StackCtor(&calc_stack, CALC_MIN_STACK_CAPACITY) != STACK_SUCCESS)
@@ -17,26 +40,18 @@ CalculatorErr_t RunCalculator(Context_t* commands_data)
         return CALC_STACK_ERROR;
     }
 
-    int lines_count = commands_data->ptrdata_params.lines_count;
-    char** ptrdata = commands_data->ptrdata_params.ptrdata;
-
-    Command_t command = HLT;
-    int value = 0;
-
-    if (OpenFile(&commands_data->output_file_info, "w"))
-    {
-        return CALC_OUTPUT_FILE_OPENNING_ERROR;
-    }
-
-    for (int i = 0; i < lines_count; i++)
+    for (int i = 0; i < commands_data->ptrdata_params.lines_count; i++)
     {
         DPRINTF("\nEntering %d iteration of ptrdata for\n", i);
-        if (GetCommand(ptrdata[i], &command, &value))
+
+        if (GetCommand(commands_data->ptrdata_params.ptrdata[i],
+                       &command, &value))
         {
             return CALC_UNKNOWN_COMMAND;
         }
         DPRINTF("Command = %d\n", command);
-        if (command == HLT)
+
+        if (command == COMM_HLT)
         {
             break;
         }
@@ -46,10 +61,6 @@ CalculatorErr_t RunCalculator(Context_t* commands_data)
             return CALC_MATH_ERROR;
         }
     }
-
-    free(commands_data->buffer_data.buffer);
-    free(commands_data->ptrdata_params.ptrdata);
-    printf("\n<End of the calculator>");
 
     return CALC_SUCCESS;
 }
@@ -70,31 +81,31 @@ int GetCommand(char* line, Command_t* command, int* value)
     }
     if (strcmp(operation, "PUSH") == 0)
     {
-        *command = PUSH;
+        *command = COMM_PUSH;
     }
     else if (strcmp(operation, "OUT") == 0)
     {
-        *command = OUT;
+        *command = COMM_OUT;
     }
     else if (strcmp(operation, "ADD") == 0)
     {
-        *command = ADD;
+        *command = COMM_ADD;
     }
     else if (strcmp(operation, "SUB") == 0)
     {
-        *command = SUB;
+        *command = COMM_SUB;
     }
     else if (strcmp(operation, "MUL") == 0)
     {
-        *command = MUL;
+        *command = COMM_MUL;
     }
     else if (strcmp(operation, "DIV") == 0)
     {
-        *command = DIV;
+        *command = COMM_DIV;
     }
     else if (strcmp(operation, "HLT") == 0)
     {
-        *command = HLT;
+        *command = COMM_HLT;
     }
     else
     {
@@ -112,42 +123,42 @@ int RunCommand(Stack_t* calc_stack, Command_t command,
 
     switch (command)
     {
-        case PUSH: {
+        case COMM_PUSH: {
             if (StackPush(calc_stack, value) != STACK_SUCCESS)
             {
                 return 1;
             }
             break;
         }
-        case ADD: {
+        case COMM_ADD: {
             if (ApplyMathOperation(calc_stack, Add) != 0)
             {
                 return 1;
             }
             break;
         }
-        case SUB: {
+        case COMM_SUB: {
             if (ApplyMathOperation(calc_stack, Sub) != 0)
             {
                 return 1;
             }
             break;
         }
-        case MUL: {
+        case COMM_MUL: {
             if (ApplyMathOperation(calc_stack, Mul) != 0)
             {
                 return 1;
             }
             break;
         }
-        case DIV: {
+        case COMM_DIV: {
             if (ApplyMathOperation(calc_stack, Div) != 0)
             {
                 return 1;
             }
             break;
         }
-        case OUT: {
+        case COMM_OUT: {
             int result = 0;
             StackErr_t pop_return = StackPop(calc_stack, &result);
 
@@ -162,7 +173,7 @@ int RunCommand(Stack_t* calc_stack, Command_t command,
             fprintf(output_stream, "ANSWER = %d\n", result);
             break;
         }
-        case HLT:
+        case COMM_HLT:
             return 1;
         default:
             return 1;

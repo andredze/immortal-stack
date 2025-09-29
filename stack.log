@@ -1,17 +1,29 @@
 reason: Stack didn't pass verifier at the start of function
-from StackPush at source/stack.cpp:88
-ERROR 5: Size exceeded capacity
-stack [000000FF403FF850]
+from StackPush at source/stack.cpp:71
+ERROR 8: Hash changed it's value
+stack: stack1 [000000700F3FFA70]
 {
-	size = 100;
-	capacity = 4;
-	data [000002065D65A340];
+	size = 13;
+	capacity = 16;
+	data [000002041EF9AC10];
 	{
 		 [0] = -1410617875 (CANARY);
-		*[1] = 40;
-		*[2] = 50;
-		 [3] = -558908742 (POISON);
-		 [4] = -558908742 (POISON);
-		 [5] = -1410617875 (CANARY);
+		*[1] = 10;
+		*[2] = 100000000;
+		*[3] = 30;
+		*[4] = 40;
+		*[5] = 50;
+		*[6] = 60;
+		*[7] = 70;
+		*[8] = 80;
+		*[9] = 90;
+		*[10] = 89;
+		*[11] = 79;
+		*[12] = 69;
+		*[13] = 59;
+		 [14] = -558908742 (POISON);
+		 [15] = -558908742 (POISON);
+		 [16] = -558908742 (POISON);
+		 [17] = -1410617875 (CANARY);
 	}
 }

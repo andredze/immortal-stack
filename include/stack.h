@@ -1,11 +1,27 @@
 #ifndef STACK_H
 #define STACK_H
 
-// #include <TXLib.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+
+#ifdef DEBUG
+#define STACK_OK(stack, reason) \
+        do { \
+            StackErr_t error = STACK_SUCCESS; \
+            if ((error = StackIsOk(stack, __FILE__, __func__, __LINE__, reason)) \
+                       != STACK_SUCCESS) \
+            { \
+                return error; \
+            } \
+        } while (0);
+#else
+#define STACK_OK(stack, reason) if (StackCheckHash(stack) != STACK_SUCCESS) \
+                                { \
+                                    return STACK_HASH_CHANGED; \
+                                }
+#endif
 
 #ifdef DEBUG
     #define INIT_STACK(name) Stack_t name = {.var_info = {#name, __FILE__, __func__, __LINE__}}
@@ -19,7 +35,7 @@
     #define DPRINTF(...) ;
 #endif
 
-const size_t STACK_SIZE_LIMIT = SIZE_MAX / 32 * 31;
+const size_t STACK_SIZE_LIMIT = SIZE_MAX / 32 * 30;
 
 const int CANARY_VALUE_INT = 0xABEBADED;
 const int POISON_INT = 0xDEAFBABA;
@@ -39,13 +55,13 @@ typedef enum StackErr {
     STACK_SIZE_EXCEEDS_LIMIT = 3,
     STACK_CAPACITY_EXCEEDS_LIMIT = 4,
     STACK_SIZE_EXCEEDS_CAPACITY = 5,
-    STACK_CALLOC_ERROR = 6,
-    STACK_REALLOC_ERROR = 7,
-    STACK_START_CANARY_RUINED = 8,
-    STACK_END_CANARY_RUINED = 9,
-    STACK_FILE_OPENNING_ERROR = 10,
-    STACK_SIZE_IS_ZERO = 11,
-    STACK_HASH_CHANGED = 12
+    STACK_START_CANARY_RUINED = 6,
+    STACK_END_CANARY_RUINED = 7,
+    STACK_HASH_CHANGED = 8,
+    STACK_CALLOC_ERROR = 9,
+    STACK_REALLOC_ERROR = 10,
+    STACK_FILE_OPENNING_ERROR = 11,
+    STACK_SIZE_IS_ZERO = 12
 } StackErr_t;
 
 typedef struct VarInfo {
@@ -92,6 +108,6 @@ StackErr_t StackCheckCanaries(Stack_t* stack);
 
 StackErr_t StackCheckHash(Stack_t* stack);
 
-size_t Hash(item_t* data);
+size_t StackHash(Stack_t* stack);
 
 #endif /* STACK_H */

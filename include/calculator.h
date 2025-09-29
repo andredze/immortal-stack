@@ -8,26 +8,28 @@
 const int CALC_MAX_COMMAND_LEN = 200;
 const size_t CALC_MIN_STACK_CAPACITY = 32;
 
-typedef enum CalculatorErr {
+typedef enum CalcErr {
     CALC_SUCCESS,
     CALC_ERROR_WITH_READING_FILE,
     CALC_STACK_ERROR,
     CALC_OUTPUT_FILE_OPENNING_ERROR,
     CALC_UNKNOWN_COMMAND,
     CALC_MATH_ERROR
-} CalculatorErr_t;
+} CalcErr_t;
 
 typedef enum Command {
-    PUSH,
-    ADD,
-    SUB,
-    MUL,
-    DIV,
-    OUT,
-    HLT
+    COMM_PUSH,
+    COMM_ADD,
+    COMM_SUB,
+    COMM_MUL,
+    COMM_DIV,
+    COMM_OUT,
+    COMM_HLT
 } Command_t;
 
-CalculatorErr_t RunCalculator(Context_t* commands_data);
+CalcErr_t ExecuteCalculatorProgramm(Context_t* commands_data);
+
+CalcErr_t ExecuteCommands(Context_t* commands_data);
 
 int GetCommand(char* line, Command_t* command, int* value);
 

@@ -1,22 +1,5 @@
 #include "stack.h"
 
-#ifdef DEBUG
-#define STACK_OK(stack, reason) \
-        do { \
-            StackErr_t error = STACK_SUCCESS; \
-            if ((error = StackIsOk(stack, __FILE__, __func__, __LINE__, reason)) \
-                       != STACK_SUCCESS) \
-            { \
-                return error; \
-            } \
-        } while (0);
-#else
-#define STACK_OK(stack, reason) if (StackCheckHash(stack) != STACK_SUCCESS) \
-                                { \
-                                    return STACK_HASH_CHANGED; \
-                                }
-#endif
-
 StackErr_t StackCtor(Stack_t* stack, size_t capacity)
 {
     if (stack == NULL)
@@ -47,7 +30,7 @@ StackErr_t StackCtor(Stack_t* stack, size_t capacity)
     }
 
     stack->data = data;
-    stack->hash = Hash(stack->data);
+    stack->hash = StackHash(stack);
 
     STACK_OK(stack, reason_end);
 
@@ -60,24 +43,24 @@ StackErr_t StackRealloc(Stack_t* stack)
 
     size_t old_capacity = stack->capacity;
     stack->capacity = old_capacity * 2;
-    item_t* data = stack->data;
 
-    data = (item_t*) realloc(data, stack->capacity + 2);
-    if (data == NULL)
+    stack->data = (item_t*) realloc(stack->data,
+                                    (stack->capacity + 2) * sizeof(item_t));
+    if (stack->data == NULL)
     {
         DPRINTF("Memory reallocation failed");
         return STACK_REALLOC_ERROR;
     }
 
-    data[0] = CANARY_VALUE;
-    data[stack->capacity + 1] = CANARY_VALUE;
+    stack->data[0] = CANARY_VALUE;
+    stack->data[stack->capacity + 1] = CANARY_VALUE;
 
     for (size_t i = old_capacity + 1; i < stack->capacity + 1; i++)
     {
-        data[i] = POISON;
+        stack->data[i] = POISON;
     }
 
-    stack->hash = Hash(stack->data);
+    stack->hash = StackHash(stack);
     STACK_OK(stack, reason_end);
 
     return STACK_SUCCESS;
@@ -89,16 +72,18 @@ StackErr_t StackPush(Stack_t* stack, item_t item)
 
     if (stack->size == stack->capacity)
     {
-        if (StackRealloc(stack) != STACK_SUCCESS)
+        StackErr_t error = STACK_SUCCESS;
+        if ((error = StackRealloc(stack)) != STACK_SUCCESS)
         {
+            DPRINTF("Realloc failed err: %d\n", error);
             return STACK_REALLOC_ERROR;
         }
     }
     stack->data[1 + stack->size++] = item;
 
-    DPRINTF("pushed = " SPEC "\n", item);
+    // DPRINTF("pushed = " SPEC "\n", item);
 
-    stack->hash = Hash(stack->data);
+    stack->hash = StackHash(stack);
     STACK_OK(stack, reason_end);
 
     return STACK_SUCCESS;
@@ -118,7 +103,7 @@ StackErr_t StackPop(Stack_t* stack, item_t* item)
 
     DPRINTF("poped = " SPEC "\n", *item);
 
-    stack->hash = Hash(stack->data);
+    stack->hash = StackHash(stack);
     STACK_OK(stack, reason_end);
 
     return STACK_SUCCESS;
@@ -126,7 +111,16 @@ StackErr_t StackPop(Stack_t* stack, item_t* item)
 
 StackErr_t StackDtor(Stack_t* stack)
 {
-    STACK_OK(stack, reason_start);
+    if (stack == NULL)
+    {
+        DPRINTF("Null stack pointer given to the stack destructor\n");
+        return STACK_IS_NULL;
+    }
+    if (stack->data == NULL)
+    {
+        DPRINTF("Null stack.data pointer given to the stack destructor\n");
+        return STACK_DATA_IS_NULL;
+    }
 
     free(stack->data);
     stack->data = NULL;
@@ -141,15 +135,17 @@ StackErr_t StackIsOk(Stack_t* stack,
                      int line,
                      const char* reason_of_calling)
 {
-    stack->var_info.file_name = file_name;
-    stack->var_info.function = function;
-    stack->var_info.line = line;
-
     StackErr_t error = STACK_SUCCESS;
     StackErr_t dump_return = STACK_SUCCESS;
     if ((error = StackVerify(stack)) != STACK_SUCCESS)
     {
-        DPRINTF("<Error occurred>");
+        DPRINTF("<ERROR OCCURRED, CHECK STACK.LOG>\n");
+        if (error != STACK_IS_NULL)
+        {
+            stack->var_info.file_name = file_name;
+            stack->var_info.function = function;
+            stack->var_info.line = line;
+        }
         if ((dump_return = StackDump(stack, error, reason_of_calling)) \
                          != STACK_SUCCESS)
         {
@@ -232,7 +228,7 @@ StackErr_t StackDump(Stack_t* stack, StackErr_t error,
     fprintf(stream, "reason: %s\n"
                     "from %s at %s:%d\n"
                     "ERROR %d: %s\n"
-                    "%s [%p]\n{\n"
+                    "stack: %s [%p]\n{\n"
                     "\tsize = %zu;\n"
                     "\tcapacity = %zu;\n"
                     "\tdata [%p];\n\t{\n",
@@ -248,9 +244,9 @@ StackErr_t StackDump(Stack_t* stack, StackErr_t error,
 
     if (error == STACK_DATA_IS_NULL)
     {
-        fprintf(stream, "\t----------------"
-                        "\t}"
-                        "}");
+        fprintf(stream, "\t\t----------------\n"
+                        "\t}\n"
+                        "}\n");
         return STACK_SUCCESS;
     }
 
@@ -273,7 +269,7 @@ StackErr_t StackDump(Stack_t* stack, StackErr_t error,
     }
 
     fprintf(stream, "\t\t [0] = " SPEC " (CANARY);\n", data[0]);
-    for (size_t i = 1; i < size; i++)
+    for (size_t i = 1; i < size + 1; i++)
     {
         if (data[i] == POISON)
         {
@@ -282,15 +278,18 @@ StackErr_t StackDump(Stack_t* stack, StackErr_t error,
         }
         fprintf(stream, "\t\t*[%zu] = " SPEC ";\n", i, data[i]);
     }
-    for (size_t j = size; j < capacity + 1; j++)
+    for (size_t j = size + 1; j < capacity + 1; j++)
     {
         fprintf(stream, "\t\t [%zu] = " SPEC " (POISON);\n",
                         j, stack->data[j]);
     }
-    fprintf(stream, "\t\t [%zu] = " SPEC " (CANARY);\n"
-                    "\t}\n"
-                    "}",
-                    capacity + 1, stack->data[capacity + 1]);
+    if (error != STACK_CAPACITY_EXCEEDS_LIMIT)
+    {
+        fprintf(stream, "\t\t [%zu] = " SPEC " (CANARY);\n",
+                        capacity + 1, stack->data[capacity + 1]);
+    }
+    fprintf(stream, "\t}\n"
+                    "}");
     fclose(stream);
 
     return STACK_SUCCESS;
@@ -306,17 +305,13 @@ StackErr_t StackVerify(Stack_t* stack)
     {
         return STACK_DATA_IS_NULL;
     }
-    if (Hash(stack->data) != stack->hash)
+    if (stack->capacity > STACK_SIZE_LIMIT)
     {
-        return STACK_HASH_CHANGED;
+        return STACK_CAPACITY_EXCEEDS_LIMIT;
     }
     if (stack->size > STACK_SIZE_LIMIT)
     {
         return STACK_SIZE_EXCEEDS_LIMIT;
-    }
-    if (stack->capacity > STACK_SIZE_LIMIT)
-    {
-        return STACK_CAPACITY_EXCEEDS_LIMIT;
     }
     if (stack->size > stack->capacity)
     {
@@ -329,6 +324,10 @@ StackErr_t StackVerify(Stack_t* stack)
     if (stack->data[stack->capacity + 1] != CANARY_VALUE)
     {
         return STACK_END_CANARY_RUINED;
+    }
+    if (StackHash(stack) != stack->hash)
+    {
+        return STACK_HASH_CHANGED;
     }
     return STACK_SUCCESS;
 }
@@ -358,7 +357,7 @@ StackErr_t StackCheckHash(Stack_t* stack)
     assert(stack != NULL);
     assert(stack->data != NULL);
 
-    if (stack->hash != Hash(stack->data))
+    if (stack->hash != StackHash(stack))
     {
         fprintf(stderr, "Hash has changed, stack is now ruined\n");
         return STACK_HASH_CHANGED;
@@ -368,14 +367,21 @@ StackErr_t StackCheckHash(Stack_t* stack)
 }
 
 // djb2
-size_t Hash(item_t* data)
+size_t StackHash(Stack_t* stack)
 {
-    char* str = (char*) data;
-    size_t hash = 5381;
-    char ch = 0;
+    assert(stack != NULL);
+    assert(stack->data != NULL);
 
-    while ((ch = *str++) != '\0')
+    char* str = (char*) stack->data;
+    size_t hash = 5381;
+
+    char ch = 0;
+    size_t i = 0;
+    size_t str_len = (stack->capacity + 2) * sizeof(item_t) / sizeof(char);
+
+    while (i < str_len)
     {
+        ch = str[i++];
         hash = ((hash << 5) + hash) + ch;
     }
 

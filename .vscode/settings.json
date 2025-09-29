@@ -9,6 +9,9 @@
         "ranges": "cpp",
         "span": "cpp",
         "functional": "cpp",
-        "optional": "cpp"
-    }
+        "optional": "cpp",
+        "text_encoding": "cpp",
+        "typeinfo": "cpp"
+    },
+    "C_Cpp.dimInactiveRegions": false
 }
