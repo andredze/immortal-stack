@@ -110,4 +110,6 @@ StackErr_t StackCheckHash(Stack_t* stack);
 
 size_t StackHash(Stack_t* stack);
 
+StackErr_t StackPrint(Stack_t* stack);
+
 #endif /* STACK_H */

@@ -101,8 +101,6 @@ StackErr_t StackPop(Stack_t* stack, item_t* item)
     *item = stack->data[--stack->size + 1];
     stack->data[stack->size + 1] = POISON;
 
-    DPRINTF("poped = " SPEC "\n", *item);
-
     stack->hash = StackHash(stack);
     STACK_OK(stack, reason_end);
 
@@ -386,4 +384,18 @@ size_t StackHash(Stack_t* stack)
     }
 
     return hash;
+}
+
+StackErr_t StackPrint(Stack_t* stack)
+{
+    STACK_OK(stack, reason_start);
+
+    printf("[");
+    for (size_t i = 0; i < stack->capacity + 1; i++)
+    {
+        printf("%d, ", stack->data[i]);
+    }
+    printf("%d]\n", stack->data[stack->capacity + 1]);
+
+    return STACK_SUCCESS;
 }

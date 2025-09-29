@@ -37,36 +37,45 @@ int RunExampleOfPop(Stack_t* stack)
 
 int RunRightUsageExample()
 {
+    DPRINTF("<Normal programm usage>\n\n");
+
     INIT_STACK(stack1);
 
     if (StackCtor(&stack1, 4) != STACK_SUCCESS)
     {
         return EXIT_FAILURE;
     }
+    StackPrint(&stack1);
 
     if (StackPush(&stack1, 40) != STACK_SUCCESS)
     {
         return EXIT_FAILURE;
     }
+    StackPrint(&stack1);
+
     if (StackPush(&stack1, 50) != STACK_SUCCESS)
     {
         return EXIT_FAILURE;
     }
+    StackPrint(&stack1);
+
+    if (StackPush(&stack1, 32) != STACK_SUCCESS)
+    {
+        return EXIT_FAILURE;
+    }
+    StackPrint(&stack1);
 
     item_t poped_item = 0;
     StackErr_t pop_return = STACK_SUCCESS;
 
-    for (int i = 0; i < 1; i++)
+    for (int i = 0; i < 4; i++)
     {
         if ((pop_return = StackPop(&stack1, &poped_item)) != STACK_SUCCESS &&
              pop_return != STACK_SIZE_IS_ZERO)
         {
             return EXIT_FAILURE;
         }
-        else if (pop_return != STACK_SIZE_IS_ZERO)
-        {
-            printf("poped_item = " SPEC "\n", poped_item);
-        }
+        StackPrint(&stack1);
     }
 
     StackDtor(&stack1);
