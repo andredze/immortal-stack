@@ -6,19 +6,38 @@
 int main()
 {
     // RunRightUsageExample();
-    RunCalculatorProgrammExample();
+    // RunCalculatorProgrammExample();
 
-    Stack_t stack_for_errors = RunStartOfExampleForErrors();
+    typedef int (*CreateStackError_t) (Stack_t*);
 
-    // CreateStackIsNullError(&stack_for_errors);
-    // CreateStackDataIsNullError(&stack_for_errors);
-    // CreateStackSizeExceedsLimitError(&stack_for_errors);
-    // CreateStackCapacityExceedsLimitError(&stack_for_errors);
-    // CreateStackSizeExceedsCapacityError(&stack_for_errors);
-    // CreateStartCanaryIsRuinedError(&stack_for_errors);
-    // CreateEndCanaryIsRuinedError(&stack_for_errors);
-    // CreateHashIsRuinedError(&stack_for_errors);
-    StackDtor(&stack_for_errors);
+    CreateStackError_t functions_creating_err[] = {CreateStackIsNullError,
+                                                   CreateStackDataIsNullError,
+                                                   CreateStackSizeExceedsLimitError,
+                                                   CreateStackCapacityExceedsLimitError,
+                                                   CreateStackSizeExceedsCapacityError,
+                                                   CreateStartCanaryIsRuinedError,
+                                                   CreateEndCanaryIsRuinedError,
+                                                   CreateHashIsRuinedError};
+    int return_value = 0;
+    Stack_t stack_for_errors = {};
+    int error_code = 0;
+
+    while (1)
+    {
+        printf("Enter the error_code to test: ");
+        if (scanf("%d", &error_code) != 1)
+        {
+            break;
+        }
+        if (error_code == EOF)
+        {
+            break;
+        }
+        stack_for_errors = RunStartOfExampleForErrors();
+        return_value = functions_creating_err[error_code](&stack_for_errors);
+        printf("return_value = %d\n", return_value);
+        StackDtor(&stack_for_errors);
+    }
 
     return EXIT_SUCCESS;
 }
