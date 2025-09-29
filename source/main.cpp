@@ -5,8 +5,8 @@
 
 int main()
 {
-    RunRightUsageExample();
-    // RunCalculatorProgrammExample();
+    // RunRightUsageExample();
+    RunCalculatorProgrammExample();
 
     Stack_t stack_for_errors = RunStartOfExampleForErrors();
 

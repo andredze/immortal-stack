@@ -79,41 +79,28 @@ int GetCommand(char* line, Command_t* command, int* value)
                         "arg_count = %d; expected = 2", arg_count);
         return 1;
     }
-    if (strcmp(operation, "PUSH") == 0)
+
+    CommCase_t comm_cases[] = {{"PUSH", COMM_PUSH},
+                               {"ADD", COMM_ADD},
+                               {"SUB", COMM_SUB},
+                               {"MUL", COMM_MUL},
+                               {"DIV", COMM_DIV},
+                               {"OUT", COMM_OUT},
+                               {"HLT", COMM_HLT}};
+
+    size_t comm_cases_size = sizeof(comm_cases) / sizeof(comm_cases[0]);
+
+    for (size_t i = 0; i < comm_cases_size; i++)
     {
-        *command = COMM_PUSH;
-    }
-    else if (strcmp(operation, "OUT") == 0)
-    {
-        *command = COMM_OUT;
-    }
-    else if (strcmp(operation, "ADD") == 0)
-    {
-        *command = COMM_ADD;
-    }
-    else if (strcmp(operation, "SUB") == 0)
-    {
-        *command = COMM_SUB;
-    }
-    else if (strcmp(operation, "MUL") == 0)
-    {
-        *command = COMM_MUL;
-    }
-    else if (strcmp(operation, "DIV") == 0)
-    {
-        *command = COMM_DIV;
-    }
-    else if (strcmp(operation, "HLT") == 0)
-    {
-        *command = COMM_HLT;
-    }
-    else
-    {
-        DPRINTF("Unknown calc command\n");
-        return 1;
+        if (strcmp(operation, comm_cases[i].str_command) == 0)
+        {
+            *command = comm_cases[i].command;
+            return 0;
+        }
     }
 
-    return 0;
+    DPRINTF("Unknown calc command\n");
+    return 1;
 }
 
 int RunCommand(Stack_t* calc_stack, Command_t command,
@@ -123,61 +110,41 @@ int RunCommand(Stack_t* calc_stack, Command_t command,
 
     switch (command)
     {
-        case COMM_PUSH: {
-            if (StackPush(calc_stack, value) != STACK_SUCCESS)
-            {
-                return 1;
-            }
-            break;
-        }
-        case COMM_ADD: {
-            if (ApplyMathOperation(calc_stack, Add) != 0)
-            {
-                return 1;
-            }
-            break;
-        }
-        case COMM_SUB: {
-            if (ApplyMathOperation(calc_stack, Sub) != 0)
-            {
-                return 1;
-            }
-            break;
-        }
-        case COMM_MUL: {
-            if (ApplyMathOperation(calc_stack, Mul) != 0)
-            {
-                return 1;
-            }
-            break;
-        }
-        case COMM_DIV: {
-            if (ApplyMathOperation(calc_stack, Div) != 0)
-            {
-                return 1;
-            }
-            break;
-        }
-        case COMM_OUT: {
-            int result = 0;
-            StackErr_t pop_return = StackPop(calc_stack, &result);
-
-            if (pop_return == STACK_SIZE_IS_ZERO)
-            {
-                break;
-            }
-            if (pop_return != STACK_SUCCESS)
-            {
-                return 1;
-            }
-            fprintf(output_stream, "ANSWER = %d\n", result);
-            break;
-        }
+        case COMM_PUSH:
+            return StackPush(calc_stack, value) == STACK_SUCCESS ? 0 : 1;
+        case COMM_ADD:
+            return ApplyMathOperation(calc_stack, Add) == MATH_SUCCESS ? 0 : 1;
+        case COMM_SUB:
+            return ApplyMathOperation(calc_stack, Sub) == MATH_SUCCESS ? 0 : 1;
+        case COMM_MUL:
+            return ApplyMathOperation(calc_stack, Mul) == MATH_SUCCESS ? 0 : 1;
+        case COMM_DIV:
+            return ApplyMathOperation(calc_stack, Div) == MATH_SUCCESS ? 0 : 1;
+        case COMM_OUT:
+            return HandleOut(calc_stack, output_stream);
         case COMM_HLT:
             return 1;
         default:
             return 1;
     }
 
+    return 0;
+}
+
+int HandleOut(Stack_t* calc_stack, FILE* output_stream)
+{
+    int result = 0;
+    StackErr_t pop_return = StackPop(calc_stack, &result);
+
+    if (pop_return == STACK_SIZE_IS_ZERO)
+    {
+        return 0;
+    }
+    if (pop_return != STACK_SUCCESS)
+    {
+        return 1;
+    }
+
+    fprintf(output_stream, "ANSWER = %d\n", result);
     return 0;
 }
