@@ -3,13 +3,13 @@
 int RunErrorTests()
 {
     SimulateStackError_t functions_creating_err[] = {SimulateStackIsNullError,
-                                                   SimulateStackDataIsNullError,
-                                                   SimulateStackSizeExceedsLimitError,
-                                                   SimulateStackCapacityExceedsLimitError,
-                                                   SimulateStackSizeExceedsCapacityError,
-                                                   SimulateStartCanaryIsRuinedError,
-                                                   SimulateEndCanaryIsRuinedError,
-                                                   SimulateHashIsRuinedError};
+                                                     SimulateStackDataIsNullError,
+                                                     SimulateStackSizeExceedsLimitError,
+                                                     SimulateStackCapacityExceedsLimitError,
+                                                     SimulateStackSizeExceedsCapacityError,
+                                                     SimulateStartCanaryIsRuinedError,
+                                                     SimulateEndCanaryIsRuinedError,
+                                                     SimulateHashIsRuinedError};
     int return_value = 0;
     Stack_t stack_for_errors = {};
     int error_code = 0;
