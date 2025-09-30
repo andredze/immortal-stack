@@ -5,9 +5,9 @@
 
 int main()
 {
-    RunRightUsageExample();
+    // RunRightUsageExample();
     // RunCalculatorProgrammExample();
-    // RunErrorTests();
+    RunErrorTests();
 
     return EXIT_SUCCESS;
 }

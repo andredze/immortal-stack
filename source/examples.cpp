@@ -14,7 +14,7 @@ int RunErrorTests()
     Stack_t stack_for_errors = {};
     int error_code = 0;
 
-    // error code from 0 to 7, other to exit
+    // error code from 1 to 8, other to exit
     while (1)
     {
         printf("-----<TEST STARTED>-----\n");
@@ -23,6 +23,7 @@ int RunErrorTests()
         {
             break;
         }
+        error_code--;
         if (error_code < 0 || error_code > 7)
         {
             break;
