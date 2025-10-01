@@ -23,6 +23,7 @@ CalcErr_t ExecuteCalculatorProgramm(Context_t* commands_data)
 
     free(commands_data->buffer_data.buffer);
     free(commands_data->ptrdata_params.ptrdata);
+    fclose(commands_data->output_file_info.stream);
     printf("\n<End of the calculator>");
 
     return CALC_SUCCESS;

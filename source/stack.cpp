@@ -44,13 +44,14 @@ StackErr_t StackReallocUp(Stack_t* stack)
     size_t old_capacity = stack->capacity;
     stack->capacity = old_capacity * 2;
 
-    stack->data = (item_t*) realloc(stack->data,
-                                    (stack->capacity + 2) * sizeof(item_t));
-    if (stack->data == NULL)
+    item_t* data = (item_t*) realloc(stack->data,
+                                     (stack->capacity + 2) * sizeof(item_t));
+    if (data == NULL)
     {
         DPRINTF("Memory reallocation up failed");
         return STACK_REALLOC_ERROR;
     }
+    stack->data = data;
 
     stack->data[0] = CANARY_VALUE;
     stack->data[stack->capacity + 1] = CANARY_VALUE;
