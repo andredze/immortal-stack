@@ -1,12 +1,9 @@
 #include "stack.h"
-#include "maths.h"
-#include "calculator.h"
 #include "examples.h"
 
 int main()
 {
-    // RunRightUsageExample();
-    // RunCalculatorProgrammExample();
+    RunRightUsageExample();
     RunErrorTests();
 
     return EXIT_SUCCESS;

@@ -2,16 +2,12 @@
 #define EXAMPLES_H
 
 #include "stack.h"
-#include "maths.h"
-#include "calculator.h"
 
 typedef int (*SimulateStackError_t) (Stack_t*);
 
 const int STACK_PUSH_EXAMPLE_VALUE = 50;
 
 int RunErrorTests();
-
-int RunCalculatorProgrammExample();
 
 int RunExampleOfPush(Stack_t* stack);
 

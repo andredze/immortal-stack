@@ -16,6 +16,7 @@ int RunErrorTests()
     Stack_t stack_for_errors = {};
     int error_code = 0;
 
+    printf("\n-------------Enter error codes from 1 to 8; 0 to exit-------------\n\n");
     // error code from 1 to 8, other to exit
     while (1)
     {
@@ -44,19 +45,6 @@ int RunErrorTests()
     }
 
     return 0;
-}
-
-int RunCalculatorProgrammExample()
-{
-    Context_t commands_data = {.input_file_info =  {.filepath = "commands.txt"},
-                              .output_file_info = {.filepath = "answers.txt"}};
-
-    if (ExecuteCalculatorProgramm(&commands_data) != CALC_SUCCESS)
-    {
-        return EXIT_FAILURE;
-    }
-
-    return EXIT_SUCCESS;
 }
 
 int RunExampleOfPush(Stack_t* stack)

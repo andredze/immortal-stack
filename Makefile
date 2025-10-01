@@ -13,9 +13,6 @@ CXXFLAGS =  -Iinclude \
 
 SOURCES = source/main.cpp \
 		  source/stack.cpp \
-		  source/maths.cpp \
-		  source/input.cpp \
-		  source/calculator.cpp \
 		  source/examples.cpp
 
 EXECUTABLE = run.exe
@@ -30,6 +27,9 @@ release:
 
 debug:
 	$(CXX) -DDEBUG $(CXXFLAGS) $(SOURCES) -o $(EXECUTABLE)
+
+canary:
+	$(CXX) -DCANARY $(CXXFLAGS) $(SOURCES) -o $(EXECUTABLE)
 
 clean:
 	rm $(OUTPUTS) $(EXECUTABLE)
