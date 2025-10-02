@@ -450,9 +450,6 @@ StackErr_t StackVerify(Stack_t* stack)
 #ifdef CANARY
 StackErr_t StackCheckCanaries(Stack_t* stack)
 {
-    assert(stack != NULL);
-    assert(stack->data != NULL);
-
     if (stack->data[0] != CANARY_VALUE)
     {
         fprintf(stderr, "Start canary has changed, stack is now ruined\n");
@@ -521,7 +518,14 @@ StackErr_t StackPrint(Stack_t* stack)
         printf("[%d, ", stack->data[0]);
     end_index += 2;
 #else
-    printf("[%d, ", stack->data[0]);
+    if (stack->data[0] == POISON)
+    {
+        printf("[*, ");
+    }
+    else
+    {
+        printf("[%d, ", stack->data[0]);
+    }
 #endif /* CANARY */
 
     for (size_t i = 1; i < end_index; i++)
@@ -538,8 +542,19 @@ StackErr_t StackPrint(Stack_t* stack)
     else
         printf("%d]\n", stack->data[end_index]);
 #else
-    printf("%d]\n", stack->data[end_index]);
+    if (stack->data[end_index] == POISON)
+    {
+        printf("*]\n");
+    }
+    else
+    {
+        printf("%d]\n", stack->data[end_index]);
+    }
 #endif /* CANARY */
+
+#ifdef HASH
+    printf("hash = %zu;\n", stack->hash);
+#endif
 
     return STACK_SUCCESS;
 }
