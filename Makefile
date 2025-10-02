@@ -19,6 +19,14 @@ EXECUTABLE = run.exe
 
 OUTPUTS = stack.log
 
+ifdef CANARY
+CXXFLAGS += -DCANARY
+endif
+
+ifdef HASH
+CXXFLAGS += -DHASH
+endif
+
 all:
 	$(CXX) $(CXXFLAGS) $(SOURCES) -o $(EXECUTABLE)
 
@@ -27,9 +35,6 @@ release:
 
 debug:
 	$(CXX) -DDEBUG $(CXXFLAGS) $(SOURCES) -o $(EXECUTABLE)
-
-canary:
-	$(CXX) -DCANARY $(CXXFLAGS) $(SOURCES) -o $(EXECUTABLE)
 
 clean:
 	rm $(OUTPUTS) $(EXECUTABLE)
