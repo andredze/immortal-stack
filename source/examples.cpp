@@ -81,7 +81,7 @@ int RunRightUsageExample()
     }
     StackPrint(&stack1);
 
-    int values[] = {10, 20, 30, 40, 50, 60, 70, 80, 90, 100};
+    int values[] = {10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 101};
     size_t values_len = sizeof(values) / sizeof(values[0]);
 
     for (size_t i = 0; i < values_len / 2; i++)

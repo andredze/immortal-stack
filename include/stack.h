@@ -61,9 +61,7 @@
     #define DPRINTF(...) ;
 #endif
 
-#ifdef DEBUG
 const size_t STACK_SIZE_LIMIT = SIZE_MAX / 32 * 30;
-#endif
 
 const int POISON_INT = 0xDEAFBABA;
 
