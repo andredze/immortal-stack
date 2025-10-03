@@ -30,7 +30,7 @@
 #define CHECK_HASH(stack) ;
 #endif
 
-#ifdef DEBUG
+#ifdef DEBUG // stack_debug
 #define DEBUG_STACK_OK(stack, reason) \
     do { \
         StackErr_t error = STACK_SUCCESS; \

@@ -108,7 +108,7 @@ StackErr_t StackReallocDown(Stack_t* stack)
 #endif
 
     stack->data = (item_t*) realloc(stack->data,
-                                    (capacity) * sizeof(item_t));
+                                    capacity * sizeof(item_t));
     if (stack->data == NULL)
     {
         DPRINTF("Memory reallocation down failed");
@@ -553,7 +553,7 @@ StackErr_t StackPrint(Stack_t* stack)
 #endif /* CANARY */
 
 #ifdef HASH
-    printf("hash = %zu;\n", stack->hash);
+    printf("hash = %zu\n", stack->hash);
 #endif
 
     return STACK_SUCCESS;
