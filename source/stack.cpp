@@ -450,6 +450,9 @@ StackErr_t StackVerify(Stack_t* stack)
 #ifdef CANARY
 StackErr_t StackCheckCanaries(Stack_t* stack)
 {
+    assert(stack != NULL);
+    assert(stack->data != NULL);
+
     if (stack->data[0] != CANARY_VALUE)
     {
         fprintf(stderr, "Start canary has changed, stack is now ruined\n");
