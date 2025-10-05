@@ -1,29 +1,29 @@
 reason: Stack didn't pass verifier at the start of function
-from StackReallocDown at source/stack.cpp:71
-ERROR 8: Hash changed it's value
-stack: stack1 [00000034A71FF750]
+from StackPush at source/stack.cpp:133
+ERROR 7: End boundary value was changed
+stack: stack1 [0000008EBCBFF840]
 {
-	size = 2;
+	size = 13;
 	capacity = 16;
-	data [00000148A05DAC60];
+	data [000001CC4C959D50];
 	{
-		 [0] = -1410617875 (CANARY);
-		*[1] = 40;
-		*[2] = 50;
-		 [3] = -558908742 (POISON);
-		 [4] = -558908742 (POISON);
-		 [5] = -558908742 (POISON);
-		 [6] = -558908742 (POISON);
-		 [7] = -558908742 (POISON);
-		 [8] = -558908742 (POISON);
-		 [9] = -558908742 (POISON);
-		 [10] = -558908742 (POISON);
-		 [11] = -558908742 (POISON);
-		 [12] = -558908742 (POISON);
-		 [13] = -558908742 (POISON);
-		 [14] = -558908742 (POISON);
-		 [15] = -558908742 (POISON);
-		 [16] = -558908742 (POISON);
-		 [17] = -1410617875 (CANARY);
+		 [0] = -1425297939 (CANARY);
+		*[1] = 10;
+		*[2] = 20;
+		*[3] = 30;
+		*[4] = 40;
+		*[5] = 50;
+		*[6] = 60;
+		*[7] = 70;
+		*[8] = 80;
+		*[9] = 90;
+		*[10] = 89;
+		*[11] = 79;
+		*[12] = 69;
+		*[13] = 0;
+		 [14] = 0 (POISON);
+		 [15] = 0 (POISON);
+		 [16] = 0 (POISON);
+		 [17] = 0 (CANARY);
 	}
 }
