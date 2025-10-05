@@ -1,29 +1,27 @@
 reason: Stack didn't pass verifier at the start of function
 from StackPush at source/stack.cpp:133
-ERROR 7: End boundary value was changed
-stack: stack1 [0000008EBCBFF840]
+ERROR 5: Size exceeded capacity
+stack: stack1 [00000001231FFAE0]
 {
-	size = 13;
+	size = 36;
 	capacity = 16;
-	data [000001CC4C959D50];
+	data [000001CDB5A79CB0];
 	{
-		 [0] = -1425297939 (CANARY);
-		*[1] = 10;
-		*[2] = 20;
-		*[3] = 30;
-		*[4] = 40;
-		*[5] = 50;
-		*[6] = 60;
-		*[7] = 70;
-		*[8] = 80;
-		*[9] = 90;
-		*[10] = 89;
-		*[11] = 79;
-		*[12] = 69;
-		*[13] = 0;
-		 [14] = 0 (POISON);
-		 [15] = 0 (POISON);
-		 [16] = 0 (POISON);
-		 [17] = 0 (CANARY);
+		*[0] = 10;
+		*[1] = 20;
+		*[2] = 30;
+		*[3] = 40;
+		*[4] = 50;
+		*[5] = 60;
+		*[6] = 70;
+		*[7] = 80;
+		*[8] = 90;
+		*[9] = 89;
+		*[10] = 79;
+		*[11] = 69;
+		*[12] = 59;
+		 [13] = -558908742 (POISON);
+		 [14] = -558908742 (POISON);
+		 [15] = -558908742 (POISON);
 	}
 }

@@ -81,6 +81,8 @@ int RunRightUsageExample()
     }
     StackPrint(&stack1);
 
+    StackDump(&stack1, STACK_SUCCESS, "test");
+
     int values[] = {10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 101};
     size_t values_len = sizeof(values) / sizeof(values[0]);
 
