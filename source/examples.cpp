@@ -73,7 +73,7 @@ int RunRightUsageExample()
 {
     DPRINTF("<Normal programm usage>\n\n");
 
-    INIT_STACK(stack1);
+    STACK_INIT(stack1);
 
     if (StackCtor(&stack1, 16) != STACK_SUCCESS)
     {
@@ -123,7 +123,7 @@ int RunRightUsageExample()
 
 Stack_t RunStartOfExampleForErrors()
 {
-    INIT_STACK(stack1);
+    STACK_INIT(stack1);
 
     if (StackCtor(&stack1, 4) != STACK_SUCCESS)
     {
