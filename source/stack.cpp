@@ -1,5 +1,7 @@
 #include "stack.h"
 
+static size_t StackHash(Stack_t* stack);
+
 StackErr_t StackCtor(Stack_t* stack, size_t capacity)
 {
     if (stack == NULL)
@@ -488,7 +490,7 @@ StackErr_t StackCheckHash(Stack_t* stack)
 
 #ifdef HASH
 // djb2
-size_t StackHash(Stack_t* stack)
+static size_t StackHash(Stack_t* stack)
 {
     assert(stack != NULL);
     assert(stack->data != NULL);
