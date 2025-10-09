@@ -53,12 +53,12 @@ StackErr_t StackCtor(Stack_t* stack, size_t capacity)
     return STACK_SUCCESS;
 }
 
-StackErr_t StackReallocUp(Stack_t* stack)
+static StackErr_t StackReallocUp(Stack_t* stack)
 {
     STACK_OK(stack, reason_start);
 
     size_t old_capacity = stack->capacity;
-    size_t capacity = old_capacity * 2;
+    size_t capacity = old_capacity * 2 + 1;
     stack->capacity = capacity;
 
 #ifdef CANARY
@@ -98,7 +98,7 @@ StackErr_t StackReallocUp(Stack_t* stack)
     return STACK_SUCCESS;
 }
 
-StackErr_t StackReallocDown(Stack_t* stack)
+static StackErr_t StackReallocDown(Stack_t* stack)
 {
     STACK_OK(stack, reason_start);
 
